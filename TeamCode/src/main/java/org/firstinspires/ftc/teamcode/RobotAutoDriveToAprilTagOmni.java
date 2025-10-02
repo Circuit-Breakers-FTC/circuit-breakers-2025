@@ -90,8 +90,10 @@ import java.util.concurrent.TimeUnit;
 // @Disabled
 public class RobotAutoDriveToAprilTagOmni extends LinearOpMode
 {
+    int patternId = -1;   // -1 is there is no pattern that the robot detected, todo is add a error to driver station when the value is -1
     // Adjust these numbers to suit your robot.
-    final double DESIRED_DISTANCE = 78.0; //  this is how close the camera should get to the target (inches)
+    final double DESIRED_DISTANCE = 80; //  this is how close the camera should get to the target (inches)
+    final double DESIRED_HEADING = 11; //What angle the robot should be compaired to the april tag
 
     //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
     //  applied to the drive motors to correct the error.
@@ -161,10 +163,19 @@ public class RobotAutoDriveToAprilTagOmni extends LinearOpMode
                 // Look to see if we have size info on this tag.
                 if (detection.metadata != null) {
                     //  Check to see if we want to track towards this tag.
-                    if ((DESIRED_TAG_ID < 0) || (detection.id == DESIRED_TAG_ID)) {
+                    if ((DESIRED_TAG_ID < 0) ||  (detection.id == DESIRED_TAG_ID)) {
                         // Yes, we want to use this tag.
                         targetFound = true;
                         desiredTag = detection;
+                        // this will store the value the robot detected that the pattern is, if it is still -1 that means that the robot has not detected it
+                        if (detection.id == 21) {
+                            patternId = 1; //the pattern is green, purple, purple
+                        } else if (detection.id == 22) {
+                            patternId = 2; // purple, green, purple
+                        } else if (detection.id == 23) {
+                            patternId = 3; // purple, purple, green
+                        }
+
                         break;  // don't look any further.
                     } else {
                         // This tag is in the library, but we do not want to track it right now.
@@ -192,7 +203,7 @@ public class RobotAutoDriveToAprilTagOmni extends LinearOpMode
 
                 // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
                 double  rangeError      = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
-                double  headingError    = desiredTag.ftcPose.bearing;
+                double  headingError    = (desiredTag.ftcPose.bearing - DESIRED_HEADING);
                 double  yawError        = desiredTag.ftcPose.yaw;
 
                 // Use the speed and turn "gains" to calculate how we want the robot to move.
@@ -335,5 +346,6 @@ public class RobotAutoDriveToAprilTagOmni extends LinearOpMode
             gainControl.setGain(gain);
             sleep(20);
         }
+        telemetry.addData("Pattern ID", patternId);
     }
 }
