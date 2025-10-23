@@ -16,8 +16,8 @@ import java.util.Objects;
 @Config
 public final class PinpointLocalizer implements Localizer {
     public static class Params {
-        public double xOffsetInMM = 102; // how sideways from the center of the robot is the X (forward) pod? Left increases
-        public double yOffsetInMM = 52.5; // how far forward from the center of the robot is the Y (Strafe) pod? forward increases
+        public double parYTicks = 2206; // y position of the parallel encoder (in tick units)
+        public double perpXTicks = -973.6155704646882; // x position of the perpendicular encoder (in tick units)
     }
 
     public static Params PARAMS = new Params();
@@ -35,7 +35,7 @@ public final class PinpointLocalizer implements Localizer {
 
         double mmPerTick = inPerTick * 25.4;
         driver.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        driver.setOffsets(PARAMS.xOffsetInMM, PARAMS.yOffsetInMM, DistanceUnit.MM);
+        driver.setOffsets(mmPerTick * PARAMS.parYTicks, mmPerTick * PARAMS.perpXTicks, DistanceUnit.MM);
 
         // TODO: reverse encoder directions if needed
         initialParDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;

@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.actions.MotorActionTargetVelocity;
 
 @Autonomous
 @Config
-public class RoadRunnerExample extends LinearOpMode {
+public class BlueAuto extends LinearOpMode {
     private CRServo servo = null;
     public static double SHOT_X = -36.0;
     public static double SHOT_Y = 12;
@@ -39,17 +39,17 @@ public class RoadRunnerExample extends LinearOpMode {
         telemetry.update();
         Actions.runBlocking(
                 new SequentialAction(
-                    new ParallelAction(
-                            drive.actionBuilder(beginPose)
-                                    .setTangent(Math.toRadians(END_TRAVEL_DIRECTION))
-                                    .splineToLinearHeading(shotPose, Math.toRadians(START_TRAVEL_DIRECTION))
-                                    .build(),
-                            new CRServoAction(servo, 0.5)
-                    ),
-                    new SleepAction(3),
-                    new CRServoAction(servo, 0)
+                        new ParallelAction(
+                                drive.actionBuilder(beginPose)
+                                        .setTangent(Math.toRadians(END_TRAVEL_DIRECTION))
+                                        .splineToLinearHeading(shotPose, Math.toRadians(START_TRAVEL_DIRECTION))
+                                        .build(),
+                                new CRServoAction(servo, 0.5)
+                        ),
+                        new SleepAction(3),
+                        new CRServoAction(servo, 0)
                 )
-             );
+        );
         telemetry.addLine("Done");
         telemetry.update();
 //        Actions.runBlocking(new SequentialAction(
@@ -59,3 +59,4 @@ public class RoadRunnerExample extends LinearOpMode {
 //        ));
     }
 }
+
