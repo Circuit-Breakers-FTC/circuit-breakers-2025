@@ -55,7 +55,7 @@ import java.util.List;
 public final class MecanumDrive {
     public static class Params {
         // IMU orientation
-        // TODO: fill in these values based on
+        // DONE: fill in these values based on
         //   see https://ftc-docs.firstinspires.org/en/latest/programming_resources/imu/imu.html?highlight=imu#physical-hub-mounting
         public RevHubOrientationOnRobot.LogoFacingDirection logoFacingDirection =
                 RevHubOrientationOnRobot.LogoFacingDirection.RIGHT;
@@ -65,10 +65,10 @@ public final class MecanumDrive {
         // drive model parameters
         public double inPerTick = 0.00197895707;
         public double lateralInPerTick = inPerTick;
-        public double trackWidthTicks = 6040.751277305178;
+        public double trackWidthTicks = 1416.4767470831832;
 
         // feedforward parameters (in tick units)
-        public double kS = 0.6903437780233714;//0.5583635382164482;
+        public double kS = 0.8949139398610746;//0.5583635382164482;
         public double kV = 0.00037814275407457414;//0.00038176169940954584;
         public double kA = 0.0001;
 
@@ -235,7 +235,7 @@ public final class MecanumDrive {
         rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        // TODO: reverse motor directions if needed
+        // DONE: reverse motor directions if needed
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         leftBack.setDirection(DcMotor.Direction.REVERSE);
         rightFront.setDirection(DcMotor.Direction.FORWARD);
