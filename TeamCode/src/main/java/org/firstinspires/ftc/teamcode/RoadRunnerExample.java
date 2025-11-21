@@ -6,6 +6,7 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -26,7 +27,7 @@ public class RoadRunnerExample extends LinearOpMode {
     public static double END_TRAVEL_DIRECTION = 180;
     @Override
     public void runOpMode() throws InterruptedException {
-        servo = hardwareMap.get(CRServo.class, "servo");
+       /// servo = hardwareMap.get(CRServo.class, "servo");
         // Where we start
         Pose2d beginPose = new Pose2d(0,0, Math.toRadians(0));
 
@@ -34,6 +35,8 @@ public class RoadRunnerExample extends LinearOpMode {
         Pose2d shotPose = new Pose2d(SHOT_X, SHOT_Y, Math.toRadians(SHOT_ANGLE));
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
+        GoBildaPinpointDriver driver = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        driver.resetPosAndIMU();
         waitForStart();
         telemetry.addLine("Starting");
         telemetry.update();
@@ -43,11 +46,11 @@ public class RoadRunnerExample extends LinearOpMode {
                             drive.actionBuilder(beginPose)
                                     .setTangent(Math.toRadians(END_TRAVEL_DIRECTION))
                                     .splineToLinearHeading(shotPose, Math.toRadians(START_TRAVEL_DIRECTION))
-                                    .build(),
-                            new CRServoAction(servo, 0.5)
+                                    .build()
+                          ///  new CRServoAction(servo, 0.5)
                     ),
-                    new SleepAction(3),
-                    new CRServoAction(servo, 0)
+                    new SleepAction(3)
+                 ///   new CRServoAction(servo, 0)
                 )
              );
         telemetry.addLine("Done");
