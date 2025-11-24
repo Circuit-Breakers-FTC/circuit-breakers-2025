@@ -16,8 +16,8 @@ import java.util.Objects;
 @Config
 public final class PinpointLocalizer implements Localizer {
     public static class Params {
-        public double parYMM = 65 ;
-        public double perpXMM = -120;
+        public double parYTicks = 820.1937556406104 ;
+        public double perpXTicks = -2840.243518339432;
     }
 
     public static Params PARAMS = new Params();
@@ -34,11 +34,14 @@ public final class PinpointLocalizer implements Localizer {
         driver = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
 
         driver.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        driver.setOffsets(PARAMS.parYMM, PARAMS.perpXMM, DistanceUnit.CM);
+
+        double mmPerTick = inPerTick * 25.4;
+        driver.setEncoderResolution(1 / mmPerTick, DistanceUnit.MM);
+        driver.setOffsets(mmPerTick * PARAMS.parYTicks, mmPerTick * PARAMS.perpXTicks, DistanceUnit.MM);
 
         // TODO: reverse encoder directions if needed
-        initialParDirection = GoBildaPinpointDriver.EncoderDirection.REVERSED;
-        initialPerpDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
+        initialParDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
+        initialPerpDirection = GoBildaPinpointDriver.EncoderDirection.REVERSED;
 
         driver.setEncoderDirections(initialParDirection, initialPerpDirection);
 

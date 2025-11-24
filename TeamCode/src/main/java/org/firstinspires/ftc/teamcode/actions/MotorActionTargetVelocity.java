@@ -25,7 +25,7 @@ public class MotorActionTargetVelocity implements Action {
             initialized = true;
             motor.setVelocity(targetVelocity);
         }
-        return (motor.getVelocity() > targetVelocity - accuracy) &&
-                (motor.getVelocity() < targetVelocity + accuracy);
+        return !((motor.getVelocity() > targetVelocity - accuracy) &&
+                (motor.getVelocity() < targetVelocity + accuracy));
     }
 }

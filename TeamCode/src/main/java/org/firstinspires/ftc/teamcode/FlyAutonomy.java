@@ -1,0 +1,123 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.ParallelAction;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
+import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.teamcode.actions.CRServoAction;
+import org.firstinspires.ftc.teamcode.actions.MotorActionTargetVelocity;
+import org.firstinspires.ftc.teamcode.actions.MotorPowerAction;
+import org.firstinspires.ftc.teamcode.actions.ServoAction;
+
+@Autonomous
+@Config
+public class FlyAutonomy extends LinearOpMode {
+    private ElapsedTime runtime = new ElapsedTime();
+    private DcMotor intake = null;
+    private DcMotorEx launchRight = null;
+    private DcMotorEx launchLeft = null;
+    private CRServo One = null;
+    private CRServo Two = null;
+    private CRServo Three = null;
+    private CRServo Four = null;
+    private CRServo Five = null;
+    private CRServo Six = null;
+    private CRServo zero = null;
+
+    public static double SHOT1_X = -15.0;
+    public static double SHOT1_Y = 16.5;
+    public static double SHOT1_ANGLE = 140;
+    public static double START_TRAVEL_DIRECTION = 0;
+    public static double END_TRAVEL_DIRECTION = 0;
+    public static double LAUNCH_VELOCITY = 2000;
+    public static double LAUNCH_ACCURACY = 50;
+    @Override
+    public void runOpMode() throws InterruptedException {
+        telemetry.addData("Status", "Initializing...");
+        telemetry.update();
+
+
+        intake = hardwareMap.get(DcMotor.class, "intake");
+        launchLeft = hardwareMap.get(DcMotorEx.class, "launchLeft");
+        launchLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        launchRight = hardwareMap.get(DcMotorEx.class, "launchRight");
+        launchRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        One = hardwareMap.get(CRServo.class, "one");
+        Two = hardwareMap.get(CRServo.class, "two");
+        Three = hardwareMap.get(CRServo.class, "three");
+        Four = hardwareMap.get(CRServo.class, "four");
+        Five = hardwareMap.get(CRServo.class, "five");
+        Six = hardwareMap.get(CRServo.class, "six");
+        zero = hardwareMap.get(CRServo.class, "zero");
+
+        launchLeft.setDirection(DcMotorEx.Direction.REVERSE);
+        launchRight.setDirection(DcMotorEx.Direction.FORWARD);
+
+        // --- INITIAL POSITIONS ---
+
+        telemetry.addData("Status", "Initialized and Ready");
+        telemetry.update();        // Where we start
+        Pose2d beginPose = new Pose2d(-64.5,16.5, Math.toRadians(90));
+
+        // Bin position/drop off position
+        Pose2d shotPose = new Pose2d(SHOT1_X, SHOT1_Y, Math.toRadians(SHOT1_ANGLE));
+
+        MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
+        GoBildaPinpointDriver driver = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        driver.resetPosAndIMU();
+        waitForStart();
+        telemetry.addLine("Starting");
+        telemetry.update();
+        Actions.runBlocking(
+                new SequentialAction(
+                    new ParallelAction(
+                        drive.actionBuilder(beginPose)
+                                .setTangent(Math.toRadians(END_TRAVEL_DIRECTION))
+                                .splineToLinearHeading(shotPose, Math.toRadians(START_TRAVEL_DIRECTION))
+                                .build(),
+                        new MotorActionTargetVelocity(launchLeft, LAUNCH_VELOCITY, LAUNCH_ACCURACY),
+                        new MotorActionTargetVelocity(launchRight, LAUNCH_VELOCITY, LAUNCH_ACCURACY)
+                        //new MotorPowerAction(intake, -1)
+                    ),
+                        new ParallelAction(
+                            new CRServoAction(One, 1),
+                            new CRServoAction(Two, 1),
+                            new CRServoAction(Three, 1),
+                            new CRServoAction(Four, -1),
+                            new CRServoAction(Five, -1),
+                            new CRServoAction(Six, -1),
+                            new CRServoAction(zero, 1)
+                        ),
+                    new SleepAction(30)
+                 ///   new CRServoAction(servo, 0)
+                )
+             );
+
+//        One.setPower(1);
+//        Two.setPower(1);
+//        Three.setPower(1);
+//        Four.setPower(-1);
+//        Five.setPower(-1);
+//        Six.setPower(-1);
+//        zero.setPower(1);
+
+        telemetry.addLine("Done");
+        telemetry.update();
+//        Actions.runBlocking(new SequentialAction(
+//                new CRServoAction(servo, 0.5),
+//                new SleepAction(3),
+//                new CRServoAction(servo, 0)
+//        ));
+    }
+}
