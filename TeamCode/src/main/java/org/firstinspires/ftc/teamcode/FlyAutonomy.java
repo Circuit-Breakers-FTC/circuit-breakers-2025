@@ -9,6 +9,7 @@ import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -26,7 +27,7 @@ import org.firstinspires.ftc.teamcode.actions.MotorPowerAction;
 @Config
 public class FlyAutonomy extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor intake = null;
+    private DcMotorEx intake = null;
     private DcMotorEx launchRight = null;
     private DcMotorEx launchLeft = null;
     private CRServo one = null;
@@ -40,18 +41,23 @@ public class FlyAutonomy extends LinearOpMode {
     public static double SHOT1_X = -15.0;
     public static double SHOT1_Y = 16.5;
     public static double SHOT1_ANGLE = 140;
-    public static double FIRST_PICKUP_X = -14.0;
+    public static double FIRST_PICKUP_X = -12.0;
     public static double PICKUP_Y = 32;
     public static double PICKUP_ANGLE = 90;
     public static double FIRST_INTAKE_X = FIRST_PICKUP_X;
-    public static double SECOND_PICKUP_X = 9;
+    public static double SECOND_PICKUP_X = 12;
+    public static double THIRD_PICKUP_X = 36;
     public static double SECOND_INTAKE_X = SECOND_PICKUP_X;
     public static double INTAKE_Y = 56;
     public static double START_TRAVEL_DIRECTION = 0;
     public static double END_TRAVEL_DIRECTION = 0;
-    public static double LAUNCH_VELOCITY = 2000;
+    public static double LAUNCH_VELOCITY = 2100;
     public static double LAUNCH_ACCURACY = 1;
+    public static double INTAKE_VELOCITY = -1000;
 
+    public static double SLEEP1 = 5;
+    public static double SLEEP2 = 5;
+    public static double SLEEP3 = 4.5;
     private void runBlocking(Action a) {
         Actions.runBlocking(new ParallelAction(
                 a,
@@ -60,6 +66,7 @@ public class FlyAutonomy extends LinearOpMode {
                     public boolean run(@NonNull TelemetryPacket telemetryPacket) {
                         telemetryPacket.addLine("left " + launchLeft.getVelocity());
                         telemetryPacket.addLine("right " + launchRight.getVelocity());
+                        telemetryPacket.addLine("intake " + intake.getVelocity());
                         return opModeIsActive();
                     }
                 }
@@ -71,7 +78,7 @@ public class FlyAutonomy extends LinearOpMode {
         telemetry.update();
 
 
-        intake = hardwareMap.get(DcMotor.class, "intake");
+        intake = hardwareMap.get(DcMotorEx.class, "intake");
         launchLeft = hardwareMap.get(DcMotorEx.class, "launchLeft");
         launchLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         launchRight = hardwareMap.get(DcMotorEx.class, "launchRight");
@@ -92,7 +99,7 @@ public class FlyAutonomy extends LinearOpMode {
 
         telemetry.addData("Status", "Initialized and Ready");
         telemetry.update();        // Where we start
-        Pose2d beginPose = new Pose2d(-64.5,16.5, Math.toRadians(90));
+        Pose2d beginPose = new Pose2d(-62.5,16.5, Math.toRadians(90));
 
         // Bin position/drop off position
         Pose2d shotPose = new Pose2d(SHOT1_X, SHOT1_Y, Math.toRadians(SHOT1_ANGLE));
@@ -107,58 +114,46 @@ public class FlyAutonomy extends LinearOpMode {
         telemetry.addLine("Starting");
         telemetry.update();
         runBlocking(
-                new SequentialAction(
-                    new ParallelAction(
-                        drive.actionBuilder(beginPose)
-                               .setTangent(Math.toRadians(END_TRAVEL_DIRECTION))
-                                .splineToLinearHeading(shotPose, Math.toRadians(START_TRAVEL_DIRECTION))
-                              .build(),
+                new ParallelAction(
+                        // Start launchers and intake at the beginning
                         new MotorActionTargetVelocity(launchLeft, LAUNCH_VELOCITY, LAUNCH_ACCURACY),
                         new MotorActionTargetVelocity(launchRight, LAUNCH_VELOCITY, LAUNCH_ACCURACY),
-                        new MotorPowerAction(intake, -1)
-                    ),
-                    new ParallelAction(
-                        new CRServoAction(one, 1),
-                        new CRServoAction(two, 1),
-                        new CRServoAction(three, 1),
-                        new CRServoAction(four, -1),
-                        new CRServoAction(five, -1),
-                        new CRServoAction(six, -1),
-                        new CRServoAction(zero, 1)
-                    ),
-                    new SleepAction(6),
-                    drive.actionBuilder(shotPose)
-                        .setTangent(Math.toRadians(PICKUP_ANGLE))
-                        .splineToLinearHeading(pickup1Pose, Math.toRadians(PICKUP_ANGLE))
-                        .splineToLinearHeading(intake1Pose, Math.toRadians(PICKUP_ANGLE))
-                        .splineToLinearHeading(shotPose, Math.toRadians(PICKUP_ANGLE))
-                        .build(),
-                    new SleepAction(4),
-                    drive.actionBuilder(shotPose)
-                        .setTangent(Math.toRadians(PICKUP_ANGLE))
-                        .splineToLinearHeading(pickup2Pose, Math.toRadians(PICKUP_ANGLE))
-                        .splineToLinearHeading(intake2Pose, Math.toRadians(PICKUP_ANGLE))
-                        .splineToLinearHeading(shotPose, Math.toRadians(PICKUP_ANGLE))
-                        .build(),
-                        new SleepAction(6)
+                        new MotorActionTargetVelocity(intake, INTAKE_VELOCITY, 1),
 
-                        )
+                        // One continuous trajectory with markers for servo activation
+                        drive.actionBuilder(beginPose)
+                                // Go to shot position
+                                .setTangent(Math.toRadians(END_TRAVEL_DIRECTION))
+                                .splineToLinearHeading(shotPose, Math.toRadians(START_TRAVEL_DIRECTION))
+                                .stopAndAdd(new ParallelAction(
+                                        new CRServoAction(one, 1),
+                                        new CRServoAction(two, 1),
+                                        new CRServoAction(three, 1),
+                                        new CRServoAction(four, -1),
+                                        new CRServoAction(five, -1),
+                                        new CRServoAction(six, -1),
+                                        new CRServoAction(zero, 1)
+                                ))
+                                .waitSeconds(SLEEP1)
+                                // First pickup cycle
+                                .setTangent(Math.toRadians(PICKUP_ANGLE))
+                                .strafeToLinearHeading(new Vector2d(FIRST_PICKUP_X, PICKUP_Y), Math.toRadians(PICKUP_ANGLE))
+                                .strafeTo(new Vector2d(FIRST_INTAKE_X, INTAKE_Y))
+                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y), Math.toRadians(SHOT1_ANGLE))
+                                .waitSeconds(SLEEP2)
+                                // Second pickup cycle
+                                .setTangent(Math.toRadians(PICKUP_ANGLE))
+                                .strafeToLinearHeading(new Vector2d(SECOND_PICKUP_X, PICKUP_Y), Math.toRadians(PICKUP_ANGLE))
+                                .strafeTo(new Vector2d(SECOND_INTAKE_X, INTAKE_Y))
+                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y), Math.toRadians(SHOT1_ANGLE))
+                                .waitSeconds(SLEEP3)
+                                .setTangent(Math.toRadians(PICKUP_ANGLE))
+                                .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, PICKUP_Y), Math.toRadians(PICKUP_ANGLE))
+                                .build()
+                )
         );
-
-//        One.setPower(1);
-//        Two.setPower(1);
-//        Three.setPower(1);
-//        Four.setPower(-1);
-//        Five.setPower(-1);
-//        Six.setPower(-1);
-//        zero.setPower(1);
 
         telemetry.addLine("Done");
         telemetry.update();
-//        Actions.runBlocking(new SequentialAction(
-//                new CRServoAction(servo, 0.5),
-//                new SleepAction(3),
-//                new CRServoAction(servo, 0)
-//        ));
     }
 }
