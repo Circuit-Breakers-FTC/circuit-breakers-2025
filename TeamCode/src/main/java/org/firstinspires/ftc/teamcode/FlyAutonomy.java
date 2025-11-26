@@ -20,6 +20,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.actions.CRServoAction;
 import org.firstinspires.ftc.teamcode.actions.MotorActionTargetVelocity;
+import org.firstinspires.ftc.teamcode.actions.MotorPowerAction;
 
 @Autonomous
 @Config
@@ -39,6 +40,13 @@ public class FlyAutonomy extends LinearOpMode {
     public static double SHOT1_X = -15.0;
     public static double SHOT1_Y = 16.5;
     public static double SHOT1_ANGLE = 140;
+    public static double FIRST_PICKUP_X = -14.0;
+    public static double PICKUP_Y = 32;
+    public static double PICKUP_ANGLE = 90;
+    public static double FIRST_INTAKE_X = FIRST_PICKUP_X;
+    public static double SECOND_PICKUP_X = 9;
+    public static double SECOND_INTAKE_X = SECOND_PICKUP_X;
+    public static double INTAKE_Y = 56;
     public static double START_TRAVEL_DIRECTION = 0;
     public static double END_TRAVEL_DIRECTION = 0;
     public static double LAUNCH_VELOCITY = 2000;
@@ -88,7 +96,10 @@ public class FlyAutonomy extends LinearOpMode {
 
         // Bin position/drop off position
         Pose2d shotPose = new Pose2d(SHOT1_X, SHOT1_Y, Math.toRadians(SHOT1_ANGLE));
-
+        Pose2d pickup1Pose = new Pose2d(FIRST_PICKUP_X, PICKUP_Y, Math.toRadians(90));
+        Pose2d intake1Pose = new Pose2d(FIRST_INTAKE_X, INTAKE_Y, Math.toRadians(90));
+        Pose2d pickup2Pose = new Pose2d(SECOND_PICKUP_X, PICKUP_Y, Math.toRadians(90));
+        Pose2d intake2Pose = new Pose2d(SECOND_INTAKE_X, INTAKE_Y, Math.toRadians(90));
         MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
         GoBildaPinpointDriver driver = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         driver.resetPosAndIMU();
@@ -98,27 +109,41 @@ public class FlyAutonomy extends LinearOpMode {
         runBlocking(
                 new SequentialAction(
                     new ParallelAction(
-//                        drive.actionBuilder(beginPose)
-//                                .setTangent(Math.toRadians(END_TRAVEL_DIRECTION))
-//                                .splineToLinearHeading(shotPose, Math.toRadians(START_TRAVEL_DIRECTION))
-//                                .build(),
+                        drive.actionBuilder(beginPose)
+                               .setTangent(Math.toRadians(END_TRAVEL_DIRECTION))
+                                .splineToLinearHeading(shotPose, Math.toRadians(START_TRAVEL_DIRECTION))
+                              .build(),
                         new MotorActionTargetVelocity(launchLeft, LAUNCH_VELOCITY, LAUNCH_ACCURACY),
-                        new MotorActionTargetVelocity(launchRight, LAUNCH_VELOCITY, LAUNCH_ACCURACY)
-                        //new MotorPowerAction(intake, -1)
+                        new MotorActionTargetVelocity(launchRight, LAUNCH_VELOCITY, LAUNCH_ACCURACY),
+                        new MotorPowerAction(intake, -1)
                     ),
-                        new ParallelAction(
-                            new CRServoAction(one, 1),
-                            new CRServoAction(two, 1),
-                            new CRServoAction(three, 1),
-                            new CRServoAction(four, -1),
-                            new CRServoAction(five, -1),
-                            new CRServoAction(six, -1),
-                            new CRServoAction(zero, 1)
-                        ),
-                    new SleepAction(30)
-                 ///   new CRServoAction(servo, 0)
-                )
-             );
+                    new ParallelAction(
+                        new CRServoAction(one, 1),
+                        new CRServoAction(two, 1),
+                        new CRServoAction(three, 1),
+                        new CRServoAction(four, -1),
+                        new CRServoAction(five, -1),
+                        new CRServoAction(six, -1),
+                        new CRServoAction(zero, 1)
+                    ),
+                    new SleepAction(6),
+                    drive.actionBuilder(shotPose)
+                        .setTangent(Math.toRadians(PICKUP_ANGLE))
+                        .splineToLinearHeading(pickup1Pose, Math.toRadians(PICKUP_ANGLE))
+                        .splineToLinearHeading(intake1Pose, Math.toRadians(PICKUP_ANGLE))
+                        .splineToLinearHeading(shotPose, Math.toRadians(PICKUP_ANGLE))
+                        .build(),
+                    new SleepAction(4),
+                    drive.actionBuilder(shotPose)
+                        .setTangent(Math.toRadians(PICKUP_ANGLE))
+                        .splineToLinearHeading(pickup2Pose, Math.toRadians(PICKUP_ANGLE))
+                        .splineToLinearHeading(intake2Pose, Math.toRadians(PICKUP_ANGLE))
+                        .splineToLinearHeading(shotPose, Math.toRadians(PICKUP_ANGLE))
+                        .build(),
+                        new SleepAction(6)
+
+                        )
+        );
 
 //        One.setPower(1);
 //        Two.setPower(1);
