@@ -87,7 +87,7 @@ import java.util.concurrent.TimeUnit;
  */
 
 @TeleOp(name="Felix Jackson Test", group = "Concept")
-// @Disabled
+@Disabled
 public class RobotAutoDriveToAprilTagOmni extends LinearOpMode
 {
     int patternId = -1;   // -1 is there is no pattern that the robot detected, todo is add a error to driver station when the value is -1
