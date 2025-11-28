@@ -89,8 +89,8 @@ public class FlyDrive extends LinearOpMode {
 
         // --- INITIAL POSITIONS ---
         boolean groupOn = false;
-        boolean intakeOn = false;
-        boolean launcher = false;
+        boolean intakeOn = true;
+        boolean launcher = true;
         boolean slowMode = false;
 
         telemetry.addData("Status", "Initialized and Ready");
