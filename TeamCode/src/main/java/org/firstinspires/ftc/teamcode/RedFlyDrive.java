@@ -1,30 +1,18 @@
 package org.firstinspires.ftc.teamcode;
 
-import static org.firstinspires.ftc.teamcode.FlyAutonomy.PICKUP_ANGLE;
-import static org.firstinspires.ftc.teamcode.FlyAutonomy.PICKUP_Y;
-import static org.firstinspires.ftc.teamcode.FlyAutonomy.SHOT1_ANGLE;
-import static org.firstinspires.ftc.teamcode.FlyAutonomy.SHOT1_X;
-import static org.firstinspires.ftc.teamcode.FlyAutonomy.SHOT1_Y;
-import static org.firstinspires.ftc.teamcode.FlyAutonomy.THIRD_PICKUP_X;
-import static org.firstinspires.ftc.teamcode.old2024.circuitbreakers.Roadrunner4High.ARM_POWER;
-import static org.firstinspires.ftc.teamcode.old2024.circuitbreakers.Roadrunner4High.BAR_POSITION_X;
-import static org.firstinspires.ftc.teamcode.old2024.circuitbreakers.Roadrunner4High.DEPOSIT_POSITION_DIRECTION;
-
-import androidx.annotation.NonNull;
+import static org.firstinspires.ftc.teamcode.RedFlyAuto.PICKUP_ANGLE;
+import static org.firstinspires.ftc.teamcode.RedFlyAuto.PICKUP_Y;
+import static org.firstinspires.ftc.teamcode.RedFlyAuto.SHOT1_ANGLE;
+import static org.firstinspires.ftc.teamcode.RedFlyAuto.SHOT1_X;
+import static org.firstinspires.ftc.teamcode.RedFlyAuto.SHOT1_Y;
+import static org.firstinspires.ftc.teamcode.RedFlyAuto.THIRD_PICKUP_X;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.Arclength;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Pose2dDual;
-import com.acmerobotics.roadrunner.PosePath;
-import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
-import com.acmerobotics.roadrunner.VelConstraint;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -32,11 +20,12 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.CRServo;
 
-import org.firstinspires.ftc.teamcode.actions.MotorAction;
+@TeleOp(name="RedFlyDrive", group="Linear OpMode")
+public class RedFlyDrive extends LinearOpMode {
 
-@TeleOp(name="FlyDrive", group="Linear OpMode")
-public class FlyDrive extends LinearOpMode {
-
+    public static double PARK_X = 39.0;
+    public static double PARK_Y = -33.0;
+    public static double PARK_ANGLE = 90;
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor frontRight = null;
     private DcMotor frontLeft = null;
@@ -53,6 +42,9 @@ public class FlyDrive extends LinearOpMode {
     private CRServo six = null;
     private CRServo zero = null;
 
+    public double blueAuto(){
+        return 1;
+    }
     @Override
     public void runOpMode() {
         //telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -98,19 +90,26 @@ public class FlyDrive extends LinearOpMode {
 
         waitForStart();
         runtime.reset();
-        Pose2d startPose = new Pose2d(new Vector2d(THIRD_PICKUP_X, PICKUP_Y), Math.toRadians(PICKUP_ANGLE));
+        Pose2d startPose = new Pose2d(new Vector2d(THIRD_PICKUP_X, PICKUP_Y * blueAuto()), Math.toRadians(PICKUP_ANGLE * blueAuto()));
         MecanumDrive drive = new MecanumDrive(hardwareMap, startPose);
         Action runningAction = null;
 
         while (opModeIsActive()) {
             drive.updatePoseEstimate();
             TelemetryPacket packet = new TelemetryPacket();
-            if (gamepad1.b) {
+            if (gamepad1.b || gamepad1.a) {
                 // automatic drive mode
                 if (gamepad1.b && runningAction == null) {
                     runningAction = new ParallelAction(
                             drive.actionBuilder(drive.localizer.getPose())
-                                    .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y), Math.toRadians(SHOT1_ANGLE))
+                                    .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(SHOT1_ANGLE*blueAuto()))
+                                    .build()
+                    );
+                }
+                else if (gamepad1.a && runningAction == null) {
+                    runningAction = new ParallelAction(
+                            drive.actionBuilder(drive.localizer.getPose())
+                                    .strafeToLinearHeading(new Vector2d(PARK_X, PARK_Y*blueAuto()), Math.toRadians(PARK_ANGLE*blueAuto()))
                                     .build()
                     );
                 }
@@ -160,10 +159,12 @@ public class FlyDrive extends LinearOpMode {
                         frontLeftPower, frontRightPower, rearLeftPower, rearRightPower);
             }
             // --- A BUTTON: Toggle Servo Group ---
-            if (gamepad1.aWasPressed()) {
-                groupOn = !groupOn;
+            if (gamepad2.aWasPressed()) {
+                groupOn = true;
             }
-
+            if (gamepad2.bWasPressed()) {
+                groupOn = false;
+            }
             if (groupOn) {
                 one.setPower(1);
                 two.setPower(1);
@@ -183,14 +184,14 @@ public class FlyDrive extends LinearOpMode {
             }
 
             // --- RIGHT BUMPER: Toggle Intake ---
-            if (gamepad1.rightBumperWasPressed()) {
+            if (gamepad2.rightBumperWasPressed()) {
                 intakeOn = !intakeOn;
             }
 
             intake.setPower(intakeOn ? -1 : 0);
 
             // --- LEFT BUMPER: Toggle Launcher ---
-            if (gamepad1.leftBumperWasPressed()) {
+            if (gamepad2.leftBumperWasPressed()) {
                 launcher = !launcher;
             }
 

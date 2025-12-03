@@ -7,8 +7,6 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
@@ -21,11 +19,10 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.actions.CRServoAction;
 import org.firstinspires.ftc.teamcode.actions.MotorActionTargetVelocity;
-import org.firstinspires.ftc.teamcode.actions.MotorPowerAction;
 
 @Autonomous
 @Config
-public class FlyAutonomy extends LinearOpMode {
+public class RedFlyAuto extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotorEx intake = null;
     private DcMotorEx launchRight = null;
@@ -42,15 +39,15 @@ public class FlyAutonomy extends LinearOpMode {
     public static double SHOT1_Y = 16.5;
     public static double SHOT1_ANGLE = 140;
     public static double FIRST_PICKUP_X = -12.0;
-    public static double PICKUP_Y = 32;
+    public static double PICKUP_Y = 30;
     public static double PICKUP_ANGLE = 90;
     public static double FIRST_INTAKE_X = FIRST_PICKUP_X;
     public static double SECOND_PICKUP_X = 12;
     public static double THIRD_PICKUP_X = 36;
     public static double SECOND_INTAKE_X = SECOND_PICKUP_X;
     public static double INTAKE_Y = 56;
-    public static double START_TRAVEL_DIRECTION = 0;
-    public static double END_TRAVEL_DIRECTION = 0;
+    public static double START_TRAVEL_DIRECTION = 180;
+    public static double END_TRAVEL_DIRECTION = 180;
     public static double LAUNCH_VELOCITY = 2100;
     public static double LAUNCH_ACCURACY = 1;
     public static double INTAKE_VELOCITY = -1000;
@@ -72,6 +69,9 @@ public class FlyAutonomy extends LinearOpMode {
                 }
         ));
 
+    }
+    public double blueAuto(){
+        return 1;
     }
     public void runOpMode() throws InterruptedException {
         telemetry.addData("Status", "Initializing...");
@@ -96,20 +96,20 @@ public class FlyAutonomy extends LinearOpMode {
         launchRight.setDirection(DcMotorEx.Direction.FORWARD);
 
         // --- INITIAL POSITIONS ---
-
-        telemetry.addData("Status", "Initialized and Ready");
-        telemetry.update();        // Where we start
-        Pose2d beginPose = new Pose2d(-62.5,16.5, Math.toRadians(90));
+        Pose2d beginPose = new Pose2d(62.5,16.5*blueAuto(), Math.toRadians(90*blueAuto()));
 
         // Bin position/drop off position
-        Pose2d shotPose = new Pose2d(SHOT1_X, SHOT1_Y, Math.toRadians(SHOT1_ANGLE));
-        Pose2d pickup1Pose = new Pose2d(FIRST_PICKUP_X, PICKUP_Y, Math.toRadians(90));
-        Pose2d intake1Pose = new Pose2d(FIRST_INTAKE_X, INTAKE_Y, Math.toRadians(90));
-        Pose2d pickup2Pose = new Pose2d(SECOND_PICKUP_X, PICKUP_Y, Math.toRadians(90));
-        Pose2d intake2Pose = new Pose2d(SECOND_INTAKE_X, INTAKE_Y, Math.toRadians(90));
+        Pose2d shotPose = new Pose2d(SHOT1_X, SHOT1_Y*blueAuto(), Math.toRadians(SHOT1_ANGLE*blueAuto()));
+        Pose2d pickup1Pose = new Pose2d(FIRST_PICKUP_X, PICKUP_Y*blueAuto(), Math.toRadians(90*blueAuto()));
+        Pose2d intake1Pose = new Pose2d(FIRST_INTAKE_X, INTAKE_Y*blueAuto(), Math.toRadians(90*blueAuto()));
+        Pose2d pickup2Pose = new Pose2d(SECOND_PICKUP_X, PICKUP_Y*blueAuto(), Math.toRadians(90*blueAuto()));
+        Pose2d intake2Pose = new Pose2d(SECOND_INTAKE_X, INTAKE_Y*blueAuto(), Math.toRadians(90*blueAuto()));
         MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
         GoBildaPinpointDriver driver = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         driver.resetPosAndIMU();
+
+        telemetry.addData("Status", "Initialized and Ready");
+        telemetry.update();        // Where we start
         waitForStart();
         telemetry.addLine("Starting");
         telemetry.update();
@@ -136,19 +136,19 @@ public class FlyAutonomy extends LinearOpMode {
                                 ))
                                 .waitSeconds(SLEEP1)
                                 // First pickup cycle
-                                .setTangent(Math.toRadians(PICKUP_ANGLE))
-                                .strafeToLinearHeading(new Vector2d(FIRST_PICKUP_X, PICKUP_Y), Math.toRadians(PICKUP_ANGLE))
-                                .strafeTo(new Vector2d(FIRST_INTAKE_X, INTAKE_Y))
-                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y), Math.toRadians(SHOT1_ANGLE))
+                                .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(FIRST_PICKUP_X, PICKUP_Y*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
+                                .strafeTo(new Vector2d(FIRST_INTAKE_X, INTAKE_Y*blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(SHOT1_ANGLE*blueAuto()))
                                 .waitSeconds(SLEEP2)
                                 // Second pickup cycle
-                                .setTangent(Math.toRadians(PICKUP_ANGLE))
-                                .strafeToLinearHeading(new Vector2d(SECOND_PICKUP_X, PICKUP_Y), Math.toRadians(PICKUP_ANGLE))
-                                .strafeTo(new Vector2d(SECOND_INTAKE_X, INTAKE_Y))
-                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y), Math.toRadians(SHOT1_ANGLE))
+                                .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(SECOND_PICKUP_X, PICKUP_Y*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
+                                .strafeTo(new Vector2d(SECOND_INTAKE_X, INTAKE_Y*blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(SHOT1_ANGLE*blueAuto()))
                                 .waitSeconds(SLEEP3)
-                                .setTangent(Math.toRadians(PICKUP_ANGLE))
-                                .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, PICKUP_Y), Math.toRadians(PICKUP_ANGLE))
+                                .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, PICKUP_Y*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
                                 .build()
                 )
         );
