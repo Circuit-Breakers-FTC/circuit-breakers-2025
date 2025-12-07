@@ -73,6 +73,9 @@ public class RedFlyAuto extends LinearOpMode {
     public double blueAuto(){
         return 1;
     }
+    public double shotAngle() {
+        return SHOT1_ANGLE;
+    }
     public void runOpMode() throws InterruptedException {
         telemetry.addData("Status", "Initializing...");
         telemetry.update();
@@ -99,7 +102,7 @@ public class RedFlyAuto extends LinearOpMode {
         Pose2d beginPose = new Pose2d(62.5,16.5*blueAuto(), Math.toRadians(90*blueAuto()));
 
         // Bin position/drop off position
-        Pose2d shotPose = new Pose2d(SHOT1_X, SHOT1_Y*blueAuto(), Math.toRadians(SHOT1_ANGLE*blueAuto()));
+        Pose2d shotPose = new Pose2d(SHOT1_X, SHOT1_Y*blueAuto(), Math.toRadians(shotAngle()));
         Pose2d pickup1Pose = new Pose2d(FIRST_PICKUP_X, PICKUP_Y*blueAuto(), Math.toRadians(90*blueAuto()));
         Pose2d intake1Pose = new Pose2d(FIRST_INTAKE_X, INTAKE_Y*blueAuto(), Math.toRadians(90*blueAuto()));
         Pose2d pickup2Pose = new Pose2d(SECOND_PICKUP_X, PICKUP_Y*blueAuto(), Math.toRadians(90*blueAuto()));
@@ -139,13 +142,13 @@ public class RedFlyAuto extends LinearOpMode {
                                 .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(FIRST_PICKUP_X, PICKUP_Y*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
                                 .strafeTo(new Vector2d(FIRST_INTAKE_X, INTAKE_Y*blueAuto()))
-                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(SHOT1_ANGLE*blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(shotAngle()))
                                 .waitSeconds(SLEEP2)
                                 // Second pickup cycle
                                 .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(SECOND_PICKUP_X, PICKUP_Y*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
                                 .strafeTo(new Vector2d(SECOND_INTAKE_X, INTAKE_Y*blueAuto()))
-                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(SHOT1_ANGLE*blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(shotAngle()))
                                 .waitSeconds(SLEEP3)
                                 .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, PICKUP_Y*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
