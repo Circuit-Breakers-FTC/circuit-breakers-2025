@@ -16,20 +16,19 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.hardware.CRServo;
 
-@TeleOp(name="RedFlyDrive", group="Linear OpMode")
+@TeleOp
 @Config
-public class RedFlyDrive extends LinearOpMode {
+public class ServoTest extends LinearOpMode {
 
     public static double PARK_X = 39.0;
     public static double PARK_Y = -33.0;
     public static double PARK_ANGLE = 90;
     public static double LAUNCH_VELOCITY = 2000;
-    public static double LAUNCH_VELOCITY_FAR = 2400;
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor frontRight = null;
     private DcMotor frontLeft = null;
@@ -73,6 +72,7 @@ public class RedFlyDrive extends LinearOpMode {
         four = hardwareMap.get(CRServo.class, "four");
         five = hardwareMap.get(CRServo.class, "five");
         six = hardwareMap.get(CRServo.class, "six");
+        zero = hardwareMap.get(CRServo.class, "zero");
 
         // --- MOTOR DIRECTIONS ---
         frontRight.setDirection(DcMotor.Direction.FORWARD);
@@ -86,7 +86,6 @@ public class RedFlyDrive extends LinearOpMode {
         boolean groupOn = false;
         boolean intakeOn = true;
         boolean launcher = true;
-        boolean launcherFar = false;
         boolean slowMode = false;
 
         telemetry.addData("Status", "Initialized and Ready");
@@ -99,131 +98,42 @@ public class RedFlyDrive extends LinearOpMode {
         Action runningAction = null;
 
         while (opModeIsActive()) {
-            drive.updatePoseEstimate();
-            TelemetryPacket packet = new TelemetryPacket();
-            if (gamepad1.b || gamepad1.a) {
-                // automatic drive mode
-                if (gamepad1.b && runningAction == null) {
-                    runningAction = new ParallelAction(
-                            drive.actionBuilder(drive.localizer.getPose())
-                                    .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(SHOT1_ANGLE*blueAuto()))
-                                    .build()
-                    );
-                }
-                else if (gamepad1.a && runningAction == null) {
-                    runningAction = new ParallelAction(
-                            drive.actionBuilder(drive.localizer.getPose())
-                                    .strafeToLinearHeading(new Vector2d(PARK_X, PARK_Y*blueAuto()), Math.toRadians(PARK_ANGLE*blueAuto()))
-                                    .build()
-                    );
-                }
-                //runningAction.preview(packet.fieldOverlay());
-                FtcDashboard.getInstance().sendTelemetryPacket(packet);
-                if (runningAction.run(packet)) {
-                    telemetry.addLine("Roadrunner action still running");
-                } else {
-                    telemetry.addLine("Roadrunner action finished");
-                }
-            }else {
-                runningAction = null;
-                // --- DRIVE INPUTS ---
-                double y = -gamepad1.left_stick_y;
-                double x = gamepad1.left_stick_x;
-                double rx = gamepad1.right_stick_x;
-
-                double frontLeftPower = y + x + rx;
-                double rearLeftPower = y - x + rx;
-                double frontRightPower = y - x - rx;
-                double rearRightPower = y + x - rx;
-
-                double max = Math.max(Math.abs(frontLeftPower), Math.max(Math.abs(rearLeftPower),
-                        Math.max(Math.abs(frontRightPower), Math.abs(rearRightPower))));
-                if (max > 1.0) {
-                    frontLeftPower /= max;
-                    rearLeftPower /= max;
-                    frontRightPower /= max;
-                    rearRightPower /= max;
-                }
-                if (gamepad1.xWasPressed()) {
-                    slowMode = !slowMode;
-                }
-                if (slowMode) {
-                    double slowFactor = 0.5;
-                    frontLeftPower *= slowFactor;
-                    rearLeftPower *= slowFactor;
-                    frontRightPower *= slowFactor;
-                    rearRightPower *= slowFactor;
-                }
-                frontLeft.setPower(frontLeftPower);
-                rearLeft.setPower(rearLeftPower);
-                frontRight.setPower(frontRightPower);
-                rearRight.setPower(rearRightPower);
-                telemetry.addLine("=== DRIVER ESSENTIALS ===");
-                telemetry.addData("Drive FL/FR/RL/RR", "%.2f %.2f %.2f %.2f",
-                        frontLeftPower, frontRightPower, rearLeftPower, rearRightPower);
-            }
-            // --- A BUTTON: Toggle Servo Group ---
-            if (gamepad2.aWasPressed()) {
-                groupOn = true;
-            }
-            if (gamepad2.bWasPressed()) {
-                groupOn = false;
-            }
-            if (groupOn) {
+            if (gamepad1.a)
                 one.setPower(1);
+            else {
+                one.setPower(0);
+            }
+            if (gamepad1.b)
                 two.setPower(1);
+            else {
+                two.setPower(0);
+            }
+            if (gamepad1.x)
                 three.setPower(1);
-                four.setPower(-1);
+            else {
+                three.setPower(0);
+            }
+            if (gamepad1.y)
+                four.setPower(1);
+            else {
+                four.setPower(0);
+            }
+            if (gamepad2.a)
                 five.setPower(1);
-                six.setPower(-1);
-            } else {
-                one.setPower(-0.5);
-                two.setPower(1);
-                three.setPower(-1);
-                four.setPower(-0.35);
-                six.setPower(-0.2);
-                five.setPower(0.5);
+            else {
+                five.setPower(0);
+            }
+            if (gamepad2.b)
+                six.setPower(1);
+            else {
+                six.setPower(0);
+            }
+            if (gamepad2.x)
+                zero.setPower(1);
+            else {
+                zero.setPower(0);
             }
 
-            // --- RIGHT BUMPER: Toggle Intake ---
-            if (gamepad2.rightBumperWasPressed()) {
-                intakeOn = !intakeOn;
-            }
-
-            intake.setPower(intakeOn ? 1 : 0);
-
-            // --- LEFT BUMPER: Toggle Launcher ---
-            if (gamepad2.leftBumperWasPressed()) {
-                launcher = !launcher;
-            }
-            if (gamepad2.rightBumperWasPressed()) {
-                intakeOn = !intakeOn;
-            }
-
-//            if (gamepad2.yWasPressed()) {
-//                launcherFar = !launcherFar;
-//            }
-
-            intake.setPower(intakeOn ? 1 : 0);
-
-            // --- LEFT BUMPER: Toggle Launcher ---
-
-
-
-
-            if (launcher) {
-                launchLeft.setVelocity(LAUNCH_VELOCITY);
-                launchRight.setVelocity(LAUNCH_VELOCITY);
-            //} else if(launcherFar){
-                //launchLeft.setVelocity(LAUNCH_VELOCITY_FAR);
-                //launchRight.setVelocity(LAUNCH_VELOCITY_FAR);
-            }else{
-                launchLeft.setVelocity(0);
-                launchRight.setVelocity(0);
-            }
-
-            // --- TELEMETRY ---
-            telemetry.clearAll();
 
             // --- DRIVER ESSENTIALS ---
             Pose2d pose = drive.localizer.getPose();
@@ -239,8 +149,8 @@ public class RedFlyDrive extends LinearOpMode {
             telemetry.addLine("--- EXTRA INFO ---");
             telemetry.addData("Launcher Vel L/R", "%.0f/%.0f", launchLeft.getVelocity(), launchRight.getVelocity());
             telemetry.addData("Joystick Y/X/RX", "%.2f %.2f %.2f", -gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
-            telemetry.addData("Individual Servo Powers", "One: %.2f Two: %.2f Three: %.2f Four: %.2f Six: %.2f",
-                    one.getPower(), two.getPower(), three.getPower(), four.getPower(), six.getPower());
+            telemetry.addData("Individual Servo Powers", "One: %.2f Two: %.2f Three: %.2f Four: %.2f Six: %.2f Zero: %.2f",
+                    one.getPower(), two.getPower(), three.getPower(), four.getPower(), six.getPower(), zero.getPower());
             telemetry.addData("Runtime", runtime.toString());
 
             telemetry.update();
