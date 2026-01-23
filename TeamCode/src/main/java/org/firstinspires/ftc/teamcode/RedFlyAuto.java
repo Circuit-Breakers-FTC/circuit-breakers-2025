@@ -57,14 +57,16 @@ public class RedFlyAuto extends LinearOpMode {
     public static double INTAKE_VELOCITY = -1000;
     public static double TURN_BACK_ON_SERVO = 0.75;
     public static double TURN_BACK_ON_SERVO2 = 1.5;
+    public static double TURN_BACK_ON_SERVO_3 = 1.5;
     public static double TWO_CYCLE_BACKUP_Y = 56;
+    public static double START_SERVO = 1.5;
 
     public static double THIRDPICKUPEND = 60;
-    public static double END_AUTO_Y = 40;
-    public static double END_AUTO_X = -6;
-    public static double END_AUTO_ANGLE = 180;
+    public static double END_AUTO_Y = 8;
+    public static double END_AUTO_X = -39;
+    public static double END_AUTO_ANGLE = 115;
 
-    public static double SHOOT_SLEEP1 = 3;
+    public static double SHOOT_SLEEP1 = 2.5;
     public static double SHOOT_SLEEP2 = 3;
     public static double SHOOT_SLEEP3 = 3;
     private void runBlocking(Action a) {
@@ -139,8 +141,7 @@ public class RedFlyAuto extends LinearOpMode {
                         drive.actionBuilder(beginPose)
                                 // Go to shot position
                                 .setTangent(Math.toRadians(START_TRAVEL_DIRECTION*blueAuto()))
-                                .splineToLinearHeading(shotPose, Math.toRadians(END_TRAVEL_DIRECTION*blueAuto()))
-                                .stopAndAdd(new ParallelAction(
+                                .afterTime(START_SERVO,new ParallelAction(
                                         new CRServoAction(one, SERVO_SPEED),
                                         new CRServoAction(two, SERVO_SPEED),
                                         new CRServoAction(three, SERVO_SPEED),
@@ -148,6 +149,18 @@ public class RedFlyAuto extends LinearOpMode {
                                         new CRServoAction(five, SERVO_SPEED),
                                         new CRServoAction(six, -1*SERVO_SPEED)
                                 ))
+                                .splineToLinearHeading(shotPose, Math.toRadians(END_TRAVEL_DIRECTION*blueAuto()))
+
+                                /*.stopAndAdd(new ParallelAction(
+                                        new CRServoAction(one, SERVO_SPEED),
+                                        new CRServoAction(two, SERVO_SPEED),
+                                        new CRServoAction(three, SERVO_SPEED),
+                                        new CRServoAction(four, -1*SERVO_SPEED),
+                                        new CRServoAction(five, SERVO_SPEED),
+                                        new CRServoAction(six, -1*SERVO_SPEED)
+                                ))
+                                */
+
                                 .waitSeconds(SHOOT_SLEEP1)
                                 // First pickup cycle
                                 .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
@@ -205,8 +218,16 @@ public class RedFlyAuto extends LinearOpMode {
                                         new CRServoAction(five, 0),
                                         new CRServoAction(six, 0)
                                 ))
-                                .strafeToLinearHeading(new Vector2d(END_AUTO_X, END_AUTO_Y), Math.toRadians(END_AUTO_ANGLE*blueAuto()))
-                                // .strafeToLinearHeading(new Vector2d(55, PICKUP_Y*blueAuto()), Math.toRadians(180*blueAuto()))
+                                .afterTime(TURN_BACK_ON_SERVO_3,new ParallelAction(
+                                        new CRServoAction(one, SERVO_SPEED),
+                                        new CRServoAction(two, SERVO_SPEED),
+                                        new CRServoAction(three, SERVO_SPEED),
+                                        new CRServoAction(four, -1*SERVO_SPEED),
+                                        new CRServoAction(five, SERVO_SPEED),
+                                        new CRServoAction(six, -1*SERVO_SPEED)
+                                ))
+                                .strafeToLinearHeading(new Vector2d(END_AUTO_X, END_AUTO_Y*blueAuto()), Math.toRadians(END_AUTO_ANGLE*blueAuto()))
+                                .waitSeconds(5)
 
                                 .build()
                 )
