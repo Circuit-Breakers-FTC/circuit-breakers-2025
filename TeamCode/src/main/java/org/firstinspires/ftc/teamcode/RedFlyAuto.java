@@ -38,18 +38,19 @@ public class RedFlyAuto extends LinearOpMode {
 
     public static double SERVO_SPEED = 0.5;
     public static double SHOT1_X = -17.0;
-    public static double SHOT1_Y = 14.5;
+    public static double SHOT1_Y = 20.5;
     public static double SHOT1_ANGLE = 135;
     public static double FIRST_PICKUP_X = -12.0;
     public static double PICKUP_Y = 30;
+    public static double THIRD_PICKUP_Y = 25;
     public static double PICKUP_ANGLE = 90;
     public static double FIRST_INTAKE_X = FIRST_PICKUP_X;
     public static double SECOND_PICKUP_X = 12;
-    public static double THIRD_PICKUP_X = 36;
+    public static double THIRD_PICKUP_X = 35;
     public static double SECOND_INTAKE_X = SECOND_PICKUP_X;
     public static double INTAKE_Y = 56;
     public static double INTAKE_Y2 = 62;
-    public static double END_TRAVEL_DIRECTION = -90;
+    public static double END_TRAVEL_DIRECTION = -156    ;
     public static double START_TRAVEL_DIRECTION = 180;
     public static double LAUNCH_VELOCITY = 2000;
     public static double LAUNCH_ACCURACY = 1;
@@ -57,6 +58,11 @@ public class RedFlyAuto extends LinearOpMode {
     public static double TURN_BACK_ON_SERVO = 0.75;
     public static double TURN_BACK_ON_SERVO2 = 1.5;
     public static double TWO_CYCLE_BACKUP_Y = 56;
+
+    public static double THIRDPICKUPEND = 60;
+    public static double END_AUTO_Y = 40;
+    public static double END_AUTO_X = -6;
+    public static double END_AUTO_ANGLE = 180;
 
     public static double SHOOT_SLEEP1 = 3;
     public static double SHOOT_SLEEP2 = 3;
@@ -189,7 +195,19 @@ public class RedFlyAuto extends LinearOpMode {
                                 .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(shotAngle()))
                                 .waitSeconds(SHOOT_SLEEP3)
                                 .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
-                                .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, PICKUP_Y*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, THIRD_PICKUP_Y*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, THIRDPICKUPEND*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
+                                .afterTime(0,new ParallelAction(
+                                        new CRServoAction(one, 0),
+                                        new CRServoAction(two, 0),
+                                        new CRServoAction(three, 0),
+                                        new CRServoAction(four, 0),
+                                        new CRServoAction(five, 0),
+                                        new CRServoAction(six, 0)
+                                ))
+                                .strafeToLinearHeading(new Vector2d(END_AUTO_X, END_AUTO_Y), Math.toRadians(END_AUTO_ANGLE*blueAuto()))
+                                // .strafeToLinearHeading(new Vector2d(55, PICKUP_Y*blueAuto()), Math.toRadians(180*blueAuto()))
+
                                 .build()
                 )
         );
