@@ -36,12 +36,12 @@ public class RedFlyAuto extends LinearOpMode {
     private CRServo six = null;
     private CRServo zero = null;
 
-    public static double SERVO_SPEED = 0.5;
-    public static double SHOT1_X = -17.0;
-    public static double SHOT1_Y = 20.5;
+    public static double SERVO_SPEED = 0.425;
+    public static double SHOT1_X = -15.5;
+    public static double SHOT1_Y = 14.5;
     public static double SHOT1_ANGLE = 135;
     public static double FIRST_PICKUP_X = -12.0;
-    public static double PICKUP_Y = 30;
+    public static double PICKUP_Y = 27.5;
     public static double THIRD_PICKUP_Y = 25;
     public static double PICKUP_ANGLE = 90;
     public static double FIRST_INTAKE_X = FIRST_PICKUP_X;
@@ -52,7 +52,7 @@ public class RedFlyAuto extends LinearOpMode {
     public static double INTAKE_Y2 = 62;
     public static double END_TRAVEL_DIRECTION = -156    ;
     public static double START_TRAVEL_DIRECTION = 180;
-    public static double LAUNCH_VELOCITY = 2000;
+    public static double LAUNCH_VELOCITY = 2016;
     public static double LAUNCH_ACCURACY = 1;
     public static double INTAKE_VELOCITY = -1000;
     public static double TURN_BACK_ON_SERVO = 0.75;
