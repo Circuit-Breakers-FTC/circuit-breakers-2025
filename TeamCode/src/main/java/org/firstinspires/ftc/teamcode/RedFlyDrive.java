@@ -21,6 +21,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.CRServo;
 
+
 @TeleOp(name="RedFlyDrive", group="Linear OpMode")
 @Config
 public class RedFlyDrive extends LinearOpMode {
@@ -177,12 +178,12 @@ public class RedFlyDrive extends LinearOpMode {
                 five.setPower(1);
                 six.setPower(-1);
             } else {
-                one.setPower(-0.5);
+                one.setPower(1);
                 two.setPower(1);
                 three.setPower(-1);
-                four.setPower(-0.35);
-                six.setPower(-0.2);
-                five.setPower(0.5);
+                four.setPower(1);
+                six.setPower(1);
+                five.setPower(1);
             }
 
             // --- RIGHT BUMPER: Toggle Intake ---
