@@ -42,6 +42,9 @@ public class RedFlyDrive extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
 
+    private boolean slowMode = false;
+    private boolean groupOn = false;
+
     public double blueAuto() {
         return 1;
     }
@@ -49,6 +52,7 @@ public class RedFlyDrive extends LinearOpMode {
     @Override
     public void runOpMode() {
 
+        // --- Hardware Map ---
         frontRight = hardwareMap.get(DcMotor.class, "frontRight");
         frontLeft  = hardwareMap.get(DcMotor.class, "frontLeft");
         rearRight  = hardwareMap.get(DcMotor.class, "backRight");
@@ -76,7 +80,7 @@ public class RedFlyDrive extends LinearOpMode {
         launchLeft.setDirection(DcMotorEx.Direction.REVERSE);
         launchRight.setDirection(DcMotorEx.Direction.FORWARD);
 
-        // AprilTag init
+        // --- AprilTag init ---
         aprilTag = new AprilTagProcessor.Builder().build();
         visionPortal = new VisionPortal.Builder()
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
@@ -99,13 +103,79 @@ public class RedFlyDrive extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            if (gamepad2.rightBumperWasPressed()) {
-                intakeOn = !intakeOn;
+            // --- GAMEPAD 1: Mecanum Drive ---
+            double y = -gamepad1.left_stick_y; // forward/backward
+            double x = gamepad1.left_stick_x;  // strafing
+            double rx = gamepad1.right_stick_x; // rotation
+
+            double frontLeftPower = y + x + rx;
+            double rearLeftPower = y - x + rx;
+            double frontRightPower = y - x - rx;
+            double rearRightPower = y + x - rx;
+
+            // Normalize powers
+            double max = Math.max(Math.abs(frontLeftPower), Math.max(Math.abs(rearLeftPower),
+                    Math.max(Math.abs(frontRightPower), Math.abs(rearRightPower))));
+            if (max > 1.0) {
+                frontLeftPower /= max;
+                rearLeftPower /= max;
+                frontRightPower /= max;
+                rearRightPower /= max;
             }
 
+            // Slow mode toggle
+            if (gamepad1.x) {
+                slowMode = !slowMode;
+            }
+            if (slowMode) {
+                double slowFactor = 0.5;
+                frontLeftPower *= slowFactor;
+                rearLeftPower *= slowFactor;
+                frontRightPower *= slowFactor;
+                rearRightPower *= slowFactor;
+            }
+
+            frontLeft.setPower(frontLeftPower);
+            rearLeft.setPower(rearLeftPower);
+            frontRight.setPower(frontRightPower);
+            rearRight.setPower(rearRightPower);
+
+            telemetry.addLine("=== DRIVER ESSENTIALS ===");
+            telemetry.addData("Drive FL/FR/RL/RR", "%.2f %.2f %.2f %.2f",
+                    frontLeftPower, frontRightPower, rearLeftPower, rearRightPower);
+
+            // --- GAMEPAD 2: Servo Group Toggle ---
+            if (gamepad2.a) {
+                groupOn = true;
+            }
+            if (gamepad2.b) {
+                groupOn = false;
+            }
+
+            if (groupOn) {
+                one.setPower(1);
+                two.setPower(1);
+                three.setPower(1);
+                four.setPower(-1);
+                five.setPower(1);
+                six.setPower(-1);
+            } else {
+                one.setPower(1);
+                two.setPower(1);
+                three.setPower(-1);
+                four.setPower(-0.5);
+                six.setPower(1);
+                five.setPower(1);
+            }
+
+            // --- GAMEPAD 2: Intake Toggle ---
+            if (gamepad2.right_bumper) {
+                intakeOn = !intakeOn;
+            }
             intake.setPower(intakeOn ? 1 : 0);
 
-            if (gamepad2.leftBumperWasPressed()) {
+            // --- GAMEPAD 2: Launcher Toggle ---
+            if (gamepad2.left_bumper) {
                 launcher = !launcher;
             }
 
@@ -123,12 +193,12 @@ public class RedFlyDrive extends LinearOpMode {
         }
     }
 
-    // ✅ OUTSIDE runOpMode
+    // --- Helper method for shooter velocity based on AprilTag ---
     private double getShooterVelocityFromAprilTag() {
         List<AprilTagDetection> detections = aprilTag.getDetections();
 
         if (detections.isEmpty()) {
-            return LAUNCH_VELOCITY; // EXACT old behavior
+            return LAUNCH_VELOCITY; // default
         }
 
         double distance = detections.get(0).ftcPose.range;
