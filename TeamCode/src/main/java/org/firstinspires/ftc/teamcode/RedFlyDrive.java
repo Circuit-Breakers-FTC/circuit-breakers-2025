@@ -33,6 +33,12 @@ public class RedFlyDrive extends LinearOpMode {
     public static double TAG_MIN_VEL = 1800;
     public static double TAG_MAX_VEL = 3600;
 
+    // Auto-align parameters
+    public static double ALIGN_KP = 0.02; // Proportional gain for alignment
+    public static double ALIGN_MIN_POWER = 0.1; // Minimum rotation power
+    public static double ALIGN_MAX_POWER = 0.3; // Maximum rotation power
+    public static double ALIGN_TOLERANCE = 2.0; // Degrees tolerance for "aligned"
+
     private DcMotor frontRight, frontLeft, rearRight, rearLeft, intake;
     private DcMotorEx launchLeft, launchRight;
     private CRServo one, two, three, four, five, six;
@@ -44,6 +50,9 @@ public class RedFlyDrive extends LinearOpMode {
 
     private boolean slowMode = false;
     private boolean groupOn = false;
+    private boolean autoAlign = false;
+
+    private boolean lastXButton = false;
 
     public double blueAuto() {
         return 1;
@@ -108,6 +117,22 @@ public class RedFlyDrive extends LinearOpMode {
             double x = gamepad1.left_stick_x;  // strafing
             double rx = gamepad1.right_stick_x; // rotation
 
+            // Auto-align with right trigger
+            if (gamepad1.right_trigger > 0.5) {
+                autoAlign = true;
+            } else {
+                autoAlign = false;
+            }
+
+            // Calculate auto-align rotation if enabled
+            if (autoAlign) {
+                double alignRotation = getAlignmentRotation();
+                // Only override manual rotation if we have a valid alignment correction
+                if (alignRotation != 0) {
+                    rx = alignRotation; // Override manual rotation with auto-align
+                }
+            }
+
             double frontLeftPower = y + x + rx;
             double rearLeftPower = y - x + rx;
             double frontRightPower = y - x - rx;
@@ -123,10 +148,12 @@ public class RedFlyDrive extends LinearOpMode {
                 rearRightPower /= max;
             }
 
-            // Slow mode toggle
-            if (gamepad1.x) {
+            // Slow mode toggle (only on button press, not hold)
+            if (gamepad1.x && !lastXButton) {
                 slowMode = !slowMode;
             }
+            lastXButton = gamepad1.x;
+
             if (slowMode) {
                 double slowFactor = 0.5;
                 frontLeftPower *= slowFactor;
@@ -141,6 +168,9 @@ public class RedFlyDrive extends LinearOpMode {
             rearRight.setPower(rearRightPower);
 
             telemetry.addLine("=== DRIVER ESSENTIALS ===");
+            telemetry.addData("Auto-Align", autoAlign ? "ACTIVE" : "OFF");
+            telemetry.addData("Right Trigger", "%.2f", gamepad1.right_trigger);
+            telemetry.addData("Rotation (rx)", "%.2f", rx);
             telemetry.addData("Drive FL/FR/RL/RR", "%.2f %.2f %.2f %.2f",
                     frontLeftPower, frontRightPower, rearLeftPower, rearRightPower);
 
@@ -191,6 +221,49 @@ public class RedFlyDrive extends LinearOpMode {
             telemetry.addData("Shooter Velocity", launchLeft.getVelocity());
             telemetry.update();
         }
+    }
+
+    // --- Helper method for auto-alignment rotation ---
+    private double getAlignmentRotation() {
+        List<AprilTagDetection> detections = aprilTag.getDetections();
+
+        // Filter for only AprilTag IDs 20 and 24
+        AprilTagDetection targetTag = null;
+        for (AprilTagDetection detection : detections) {
+            if (detection.id == 20 || detection.id == 24) {
+                targetTag = detection;
+                break;
+            }
+        }
+
+        if (targetTag == null) {
+            telemetry.addData("Align Status", "No target tag");
+            return 0; // No rotation if no tag found
+        }
+
+        // Get yaw angle (horizontal angle from camera center)
+        double yaw = targetTag.ftcPose.yaw;
+
+        // Check if we're within tolerance
+        if (Math.abs(yaw) < ALIGN_TOLERANCE) {
+            telemetry.addData("Align Status", "LOCKED (yaw: %.1f°)", yaw);
+            return 0; // Already aligned
+        }
+
+        // Calculate proportional rotation power
+        double rotationPower = yaw * ALIGN_KP;
+
+        // Apply min/max limits and ensure minimum power
+        if (rotationPower > 0) {
+            rotationPower = Math.max(ALIGN_MIN_POWER, Math.min(ALIGN_MAX_POWER, rotationPower));
+        } else {
+            rotationPower = Math.max(-ALIGN_MAX_POWER, Math.min(-ALIGN_MIN_POWER, rotationPower));
+        }
+
+        telemetry.addData("Align Status", "Adjusting (yaw: %.1f°)", yaw);
+        telemetry.addData("Align Power", "%.2f", rotationPower);
+
+        return rotationPower;
     }
 
     // --- Helper method for shooter velocity based on AprilTag ---
