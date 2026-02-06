@@ -197,15 +197,25 @@ public class RedFlyDrive extends LinearOpMode {
     private double getShooterVelocityFromAprilTag() {
         List<AprilTagDetection> detections = aprilTag.getDetections();
 
-        if (detections.isEmpty()) {
-            return LAUNCH_VELOCITY; // default
+        // Filter for only AprilTag IDs 20 and 24
+        AprilTagDetection targetTag = null;
+        for (AprilTagDetection detection : detections) {
+            if (detection.id == 20 || detection.id == 24) {
+                targetTag = detection;
+                break;
+            }
         }
 
-        double distance = detections.get(0).ftcPose.range;
+        if (targetTag == null) {
+            return LAUNCH_VELOCITY; // default if no matching tag found
+        }
+
+        double distance = targetTag.ftcPose.range;
 
         double velocity = 2400 + (distance - TAG_DIST_AT_2400) * TAG_SLOPE;
         velocity = Math.max(TAG_MIN_VEL, Math.min(TAG_MAX_VEL, velocity));
 
+        telemetry.addData("Tag ID", targetTag.id);
         telemetry.addData("Tag Distance (in)", distance);
         telemetry.addData("Auto Shooter Vel", velocity);
 
