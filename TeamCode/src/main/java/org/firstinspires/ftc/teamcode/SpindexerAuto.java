@@ -9,15 +9,10 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-
-import org.firstinspires.ftc.teamcode.actions.CRServoAction;
-import org.firstinspires.ftc.teamcode.actions.MotorAction;
-import org.firstinspires.ftc.teamcode.actions.MotorActionTargetVelocity;
 
 @Autonomous
 @Config
-public class RoadRunnerExample extends LinearOpMode {
+public class SpindexerAuto extends LinearOpMode {
     private CRServo servo = null;
     public static double SHOT_X = -36.0;
     public static double SHOT_Y = 12;
