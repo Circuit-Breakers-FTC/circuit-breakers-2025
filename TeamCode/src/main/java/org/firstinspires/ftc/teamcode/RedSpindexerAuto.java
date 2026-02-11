@@ -13,8 +13,10 @@ import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.actions.CRServoAction;
@@ -24,13 +26,23 @@ import org.firstinspires.ftc.teamcode.actions.MotorPowerAction;
 @Autonomous
 @Config
 public class RedSpindexerAuto extends LinearOpMode {
+    private DcMotor leftFrontDrive = null;
+    private DcMotor rightFrontDrive = null;
+    private DcMotor leftBackDrive = null;
+    private DcMotor rightBackDrive = null;
+    private DcMotorEx launcher = null;
+    private Servo gate = null;
+    private DcMotorEx spindexer = null;
+    private DcMotor intake = null;
+    private ColorSensor colorSensor1;
+    private ColorSensor colorSensor2;
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotorEx intake = null;
 
 
 
 
     public static double SERVO_SPEED = 0.425;
+    public int targetPos;
     public static double SHOT1_X = -15.5;
     public static double SHOT1_Y = 14.5;
     public static double SHOT1_ANGLE = 135;
@@ -56,6 +68,11 @@ public class RedSpindexerAuto extends LinearOpMode {
     public static double START_SERVO = 1.5;
     public boolean intakeOn = false;
 
+    //this is where all of the random spindexter additations go
+    int pos = 1;
+    boolean yWasPressed = false;
+    //this is where the spindexters additations end
+
     public static double THIRDPICKUPEND = 60;
     public static double END_AUTO_Y = 8;
     public static double END_AUTO_X = -39;
@@ -70,8 +87,6 @@ public class RedSpindexerAuto extends LinearOpMode {
                 new Action() {
                     @Override
                     public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-
-                        telemetryPacket.addLine("intake " + intake.getVelocity());
                         return opModeIsActive();
                     }
                 }
@@ -104,7 +119,31 @@ public class RedSpindexerAuto extends LinearOpMode {
         MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
         GoBildaPinpointDriver driver = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         driver.resetPosAndIMU();
-
+        if (yWasPressed) {
+            pos +=1;
+            if (pos > 3){
+                pos = 1;
+            }
+            yWasPressed = false;
+        }
+        if (pos == 1){
+            targetPos = 0;
+            spindexer.setTargetPosition(targetPos);
+            spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            spindexer.setPower(1.0);
+        }
+        if (pos == 2){
+            targetPos = 180;
+            spindexer.setTargetPosition(targetPos);
+            spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            spindexer.setPower(1.0);
+        }
+        if (pos == 3){
+            targetPos = 360;
+            spindexer.setTargetPosition(targetPos);
+            spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            spindexer.setPower(1.0);
+        }
         telemetry.addData("Status", "Initialized and Ready");
         telemetry.update();        // Where we start
         waitForStart();
@@ -119,7 +158,6 @@ public class RedSpindexerAuto extends LinearOpMode {
                         // One continuous trajectory with markers for servo activation
                         drive.actionBuilder(beginPose)
                                 // Go to shot position
-
                                 .setTangent(Math.toRadians(START_TRAVEL_DIRECTION*blueAuto()))
                                 .afterTime(START_SERVO,new ParallelAction(
 
