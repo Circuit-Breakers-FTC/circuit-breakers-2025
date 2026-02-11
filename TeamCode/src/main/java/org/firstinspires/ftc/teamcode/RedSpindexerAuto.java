@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+    package org.firstinspires.ftc.teamcode;
 
 import androidx.annotation.NonNull;
 
@@ -26,15 +26,9 @@ import org.firstinspires.ftc.teamcode.actions.MotorPowerAction;
 public class RedSpindexerAuto extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotorEx intake = null;
-    private DcMotorEx launchRight = null;
-    private DcMotorEx launchLeft = null;
-    private CRServo one = null;
-    private CRServo two = null;
-    private CRServo three = null;
-    private CRServo four = null;
-    private CRServo five = null;
-    private CRServo six = null;
-    private CRServo zero = null;
+
+
+
 
     public static double SERVO_SPEED = 0.425;
     public static double SHOT1_X = -15.5;
@@ -58,8 +52,9 @@ public class RedSpindexerAuto extends LinearOpMode {
     public static double TURN_BACK_ON_SERVO = 0.75;
     public static double TURN_BACK_ON_SERVO2 = 1.5;
     public static double TURN_BACK_ON_SERVO_3 = 1.5;
-    public static double TWO_CYCLE_BACKUP_Y = 56;
+    public static double TWO_CYCLE_BACKUP_Y = 47;
     public static double START_SERVO = 1.5;
+    public boolean intakeOn = false;
 
     public static double THIRDPICKUPEND = 60;
     public static double END_AUTO_Y = 8;
@@ -75,8 +70,7 @@ public class RedSpindexerAuto extends LinearOpMode {
                 new Action() {
                     @Override
                     public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                        telemetryPacket.addLine("left " + launchLeft.getVelocity());
-                        telemetryPacket.addLine("right " + launchRight.getVelocity());
+
                         telemetryPacket.addLine("intake " + intake.getVelocity());
                         return opModeIsActive();
                     }
@@ -96,21 +90,7 @@ public class RedSpindexerAuto extends LinearOpMode {
 
 
         intake = hardwareMap.get(DcMotorEx.class, "intake");
-        launchLeft = hardwareMap.get(DcMotorEx.class, "launchLeft");
-        launchLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        launchRight = hardwareMap.get(DcMotorEx.class, "launchRight");
-        launchRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        one = hardwareMap.get(CRServo.class, "one");
-        two = hardwareMap.get(CRServo.class, "two");
-        three = hardwareMap.get(CRServo.class, "three");
-        four = hardwareMap.get(CRServo.class, "four");
-        five = hardwareMap.get(CRServo.class, "five");
-        six = hardwareMap.get(CRServo.class, "six");
-        zero = hardwareMap.get(CRServo.class, "zero");
-
-        launchLeft.setDirection(DcMotorEx.Direction.REVERSE);
-        launchRight.setDirection(DcMotorEx.Direction.FORWARD);
 
         // --- INITIAL POSITIONS ---
         Pose2d beginPose = new Pose2d(62.5,16.5*blueAuto(), Math.toRadians(90*blueAuto()));
@@ -133,21 +113,16 @@ public class RedSpindexerAuto extends LinearOpMode {
         Actions.runBlocking(
                 new ParallelAction(
                         // Start launchers and intake at the beginning
-                        new MotorActionTargetVelocity(launchLeft, LAUNCH_VELOCITY, LAUNCH_ACCURACY),
-                        new MotorActionTargetVelocity(launchRight, LAUNCH_VELOCITY, LAUNCH_ACCURACY),
-                        new MotorPowerAction(intake, 1),
+
+                        new MotorPowerAction(intake, -0.9),
 
                         // One continuous trajectory with markers for servo activation
                         drive.actionBuilder(beginPose)
                                 // Go to shot position
+
                                 .setTangent(Math.toRadians(START_TRAVEL_DIRECTION*blueAuto()))
                                 .afterTime(START_SERVO,new ParallelAction(
-                                        new CRServoAction(one, SERVO_SPEED),
-                                        new CRServoAction(two, SERVO_SPEED),
-                                        new CRServoAction(three, SERVO_SPEED),
-                                        new CRServoAction(four, -1*SERVO_SPEED),
-                                        new CRServoAction(five, SERVO_SPEED),
-                                        new CRServoAction(six, -1*SERVO_SPEED)
+
                                 ))
                                 .splineToLinearHeading(shotPose, Math.toRadians(END_TRAVEL_DIRECTION*blueAuto()))
 
@@ -166,22 +141,8 @@ public class RedSpindexerAuto extends LinearOpMode {
                                 .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(FIRST_PICKUP_X, PICKUP_Y*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
                                 .strafeTo(new Vector2d(FIRST_INTAKE_X, INTAKE_Y*blueAuto()))
-                                .afterTime(0,new ParallelAction(
-                                        new CRServoAction(one, 0),
-                                        new CRServoAction(two, 0),
-                                        new CRServoAction(three, 0),
-                                        new CRServoAction(four, 0),
-                                        new CRServoAction(five, 0),
-                                        new CRServoAction(six, 0)
-                                ))
-                                .afterTime(TURN_BACK_ON_SERVO,new ParallelAction(
-                                        new CRServoAction(one, SERVO_SPEED),
-                                        new CRServoAction(two, SERVO_SPEED),
-                                        new CRServoAction(three, SERVO_SPEED),
-                                        new CRServoAction(four, -1*SERVO_SPEED),
-                                        new CRServoAction(five, SERVO_SPEED),
-                                        new CRServoAction(six, -1*SERVO_SPEED)
-                                ))
+
+
                                 .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(shotAngle()))
                                 .waitSeconds(SHOOT_SLEEP2)
                                 // Second pickup cycle
@@ -189,43 +150,14 @@ public class RedSpindexerAuto extends LinearOpMode {
                                 .strafeToLinearHeading(new Vector2d(SECOND_PICKUP_X, PICKUP_Y*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
                                 .strafeTo(new Vector2d(SECOND_INTAKE_X, INTAKE_Y2*blueAuto()))
                                 .strafeTo(new Vector2d(SECOND_INTAKE_X,TWO_CYCLE_BACKUP_Y*blueAuto()))
-                                .afterTime(0,new ParallelAction(
-                                        new CRServoAction(one, 0),
-                                        new CRServoAction(two, 0),
-                                        new CRServoAction(three, 0),
-                                        new CRServoAction(four, 0),
-                                        new CRServoAction(five, 0),
-                                        new CRServoAction(six, 0)
-                                ))
-                                .afterTime(TURN_BACK_ON_SERVO2,new ParallelAction(
-                                        new CRServoAction(one, SERVO_SPEED),
-                                        new CRServoAction(two, SERVO_SPEED),
-                                        new CRServoAction(three, SERVO_SPEED),
-                                        new CRServoAction(four, -1*SERVO_SPEED),
-                                        new CRServoAction(five, SERVO_SPEED),
-                                        new CRServoAction(six, -1*SERVO_SPEED)
-                                ))
+
+
                                 .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(shotAngle()))
                                 .waitSeconds(SHOOT_SLEEP3)
                                 .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, THIRD_PICKUP_Y*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, THIRDPICKUPEND*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
-                                .afterTime(0,new ParallelAction(
-                                        new CRServoAction(one, 0),
-                                        new CRServoAction(two, 0),
-                                        new CRServoAction(three, 0),
-                                        new CRServoAction(four, 0),
-                                        new CRServoAction(five, 0),
-                                        new CRServoAction(six, 0)
-                                ))
-                                .afterTime(TURN_BACK_ON_SERVO_3,new ParallelAction(
-                                        new CRServoAction(one, SERVO_SPEED),
-                                        new CRServoAction(two, SERVO_SPEED),
-                                        new CRServoAction(three, SERVO_SPEED),
-                                        new CRServoAction(four, -1*SERVO_SPEED),
-                                        new CRServoAction(five, SERVO_SPEED),
-                                        new CRServoAction(six, -1*SERVO_SPEED)
-                                ))
+
                                 .strafeToLinearHeading(new Vector2d(END_AUTO_X, END_AUTO_Y*blueAuto()), Math.toRadians(END_AUTO_ANGLE*blueAuto()))
                                 .waitSeconds(5)
 
