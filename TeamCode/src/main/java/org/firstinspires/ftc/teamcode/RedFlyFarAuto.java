@@ -71,8 +71,8 @@ public class RedFlyFarAuto extends LinearOpMode {
     public static double SHOOT_SLEEP3 = 3;
 
     //new far code here
-    public static double SHOT1_X = 11;
-    public static double SHOT1_Y = 1;
+    public static double SHOT1_X = 132;
+    public static double SHOT1_Y = 12;
     private void runBlocking(Action a) {
         Actions.runBlocking(new ParallelAction(
                 a,
