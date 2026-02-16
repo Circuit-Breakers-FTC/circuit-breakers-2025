@@ -152,8 +152,8 @@ public class RedFlyDrive extends LinearOpMode {
                 six.setPower(-1);
             } else {
                 four.setPower(-0.5);
-                six.setPower(1);
                 five.setPower(1);
+                six.setPower(1);
 
             }
 

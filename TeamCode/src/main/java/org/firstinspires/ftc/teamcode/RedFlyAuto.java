@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import androidx.annotation.NonNull;
-import androidx.xr.runtime.Config;
+
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -29,9 +29,8 @@ public class RedFlyAuto extends LinearOpMode {
     private DcMotorEx intake = null;
     private DcMotorEx launchRight = null;
     private DcMotorEx launchLeft = null;
-    private CRServo one = null;
-    private CRServo two = null;
-    private CRServo three = null;
+    private DcMotorEx cycleMotor = null;
+
     private CRServo four = null;
     private CRServo five = null;
     private CRServo six = null;
@@ -53,10 +52,10 @@ public class RedFlyAuto extends LinearOpMode {
     public static double INTAKE_Y2 = 62;
     public static double END_TRAVEL_DIRECTION = -156    ;
     public static double START_TRAVEL_DIRECTION = 180;
-    public static double LAUNCH_VELOCITY = 2016;
+    public static double LAUNCH_VELOCITY = 1225;
     public static double LAUNCH_ACCURACY = 1;
     public static double INTAKE_VELOCITY = -1000;
-    public static double TURN_BACK_ON_SERVO = 0.75;
+    public static double TURN_BACK_ON_SERVO = 1.15;
     public static double TURN_BACK_ON_SERVO2 = 1.5;
     public static double TURN_BACK_ON_SERVO_3 = 1.5;
     public static double TWO_CYCLE_BACKUP_Y = 56;
@@ -70,6 +69,7 @@ public class RedFlyAuto extends LinearOpMode {
     public static double SHOOT_SLEEP1 = 2.5;
     public static double SHOOT_SLEEP2 = 3;
     public static double SHOOT_SLEEP3 = 3;
+    public static int cycleMotorSpeed = 6000;
     private void runBlocking(Action a) {
         Actions.runBlocking(new ParallelAction(
                 a,
@@ -102,9 +102,11 @@ public class RedFlyAuto extends LinearOpMode {
         launchRight = hardwareMap.get(DcMotorEx.class, "launchRight");
         launchRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        one = hardwareMap.get(CRServo.class, "one");
-        two = hardwareMap.get(CRServo.class, "two");
-        three = hardwareMap.get(CRServo.class, "three");
+        cycleMotor = hardwareMap.get(DcMotorEx.class, "cycleMotor");
+        cycleMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        cycleMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        cycleMotor.setDirection(DcMotorEx.Direction.FORWARD);
+
         four = hardwareMap.get(CRServo.class, "four");
         five = hardwareMap.get(CRServo.class, "five");
         six = hardwareMap.get(CRServo.class, "six");
@@ -129,6 +131,7 @@ public class RedFlyAuto extends LinearOpMode {
         telemetry.addData("Status", "Initialized and Ready");
         telemetry.update();        // Where we start
         waitForStart();
+        cycleMotor.setVelocity(cycleMotorSpeed);
         telemetry.addLine("Starting");
         telemetry.update();
         Actions.runBlocking(
@@ -143,9 +146,7 @@ public class RedFlyAuto extends LinearOpMode {
                                 // Go to shot position
                                 .setTangent(Math.toRadians(START_TRAVEL_DIRECTION*blueAuto()))
                                 .afterTime(START_SERVO,new ParallelAction(
-                                        new CRServoAction(one, SERVO_SPEED),
-                                        new CRServoAction(two, SERVO_SPEED),
-                                        new CRServoAction(three, SERVO_SPEED),
+
                                         new CRServoAction(four, -1*SERVO_SPEED),
                                         new CRServoAction(five, SERVO_SPEED),
                                         new CRServoAction(six, -1*SERVO_SPEED)
@@ -163,22 +164,20 @@ public class RedFlyAuto extends LinearOpMode {
                                 */
 
                                 .waitSeconds(SHOOT_SLEEP1)
+                                // intake mode
+                                .afterTime(0,new ParallelAction(
+
+                                        new CRServoAction(four, -0.5),
+                                        new CRServoAction(five, 1),
+                                        new CRServoAction(six, 1)
+                                ))
                                 // First pickup cycle
                                 .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(FIRST_PICKUP_X, PICKUP_Y*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
                                 .strafeTo(new Vector2d(FIRST_INTAKE_X, INTAKE_Y*blueAuto()))
-                                .afterTime(0,new ParallelAction(
-                                        new CRServoAction(one, 0),
-                                        new CRServoAction(two, 0),
-                                        new CRServoAction(three, 0),
-                                        new CRServoAction(four, 0),
-                                        new CRServoAction(five, 0),
-                                        new CRServoAction(six, 0)
-                                ))
+
                                 .afterTime(TURN_BACK_ON_SERVO,new ParallelAction(
-                                        new CRServoAction(one, SERVO_SPEED),
-                                        new CRServoAction(two, SERVO_SPEED),
-                                        new CRServoAction(three, SERVO_SPEED),
+
                                         new CRServoAction(four, -1*SERVO_SPEED),
                                         new CRServoAction(five, SERVO_SPEED),
                                         new CRServoAction(six, -1*SERVO_SPEED)
@@ -191,17 +190,13 @@ public class RedFlyAuto extends LinearOpMode {
                                 .strafeTo(new Vector2d(SECOND_INTAKE_X, INTAKE_Y2*blueAuto()))
                                 .strafeTo(new Vector2d(SECOND_INTAKE_X,TWO_CYCLE_BACKUP_Y*blueAuto()))
                                 .afterTime(0,new ParallelAction(
-                                        new CRServoAction(one, 0),
-                                        new CRServoAction(two, 0),
-                                        new CRServoAction(three, 0),
+
                                         new CRServoAction(four, 0),
                                         new CRServoAction(five, 0),
                                         new CRServoAction(six, 0)
                                 ))
                                 .afterTime(TURN_BACK_ON_SERVO2,new ParallelAction(
-                                        new CRServoAction(one, SERVO_SPEED),
-                                        new CRServoAction(two, SERVO_SPEED),
-                                        new CRServoAction(three, SERVO_SPEED),
+
                                         new CRServoAction(four, -1*SERVO_SPEED),
                                         new CRServoAction(five, SERVO_SPEED),
                                         new CRServoAction(six, -1*SERVO_SPEED)
@@ -212,17 +207,13 @@ public class RedFlyAuto extends LinearOpMode {
                                 .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, THIRD_PICKUP_Y*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, THIRDPICKUPEND*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
                                 .afterTime(0,new ParallelAction(
-                                        new CRServoAction(one, 0),
-                                        new CRServoAction(two, 0),
-                                        new CRServoAction(three, 0),
+
                                         new CRServoAction(four, 0),
                                         new CRServoAction(five, 0),
                                         new CRServoAction(six, 0)
                                 ))
                                 .afterTime(TURN_BACK_ON_SERVO_3,new ParallelAction(
-                                        new CRServoAction(one, SERVO_SPEED),
-                                        new CRServoAction(two, SERVO_SPEED),
-                                        new CRServoAction(three, SERVO_SPEED),
+
                                         new CRServoAction(four, -1*SERVO_SPEED),
                                         new CRServoAction(five, SERVO_SPEED),
                                         new CRServoAction(six, -1*SERVO_SPEED)
