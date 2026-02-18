@@ -27,10 +27,10 @@ import org.firstinspires.ftc.teamcode.actions.MotorPowerAction;
 @Config
 public class RedSpindexerAuto extends LinearOpMode {
     // --- Hardware ---
-    private DcMotor leftFrontDrive = null;
-    private DcMotor rightFrontDrive = null;
-    private DcMotor leftBackDrive = null;
-    private DcMotor rightBackDrive = null;
+    private DcMotor left_front_drive = null;
+    private DcMotor right_front_drive = null;
+    private DcMotor left_back_drive = null;
+    private DcMotor right_back_drive = null;
     private DcMotorEx launcher = null;
     private Servo gate = null;
     private DcMotorEx spindexer = null;
@@ -92,11 +92,12 @@ public class RedSpindexerAuto extends LinearOpMode {
     boolean sucking = false;
     boolean collectDriving = false;
     int v1 = 0;
-    boolean targetPos1 = true;
-    boolean targetPos2 = true;
-    boolean targetPos3 = true;
+    boolean slot1 = true; // pos 1 starts with a ball
+    boolean slot2 = true; // pos 2 starts with a ball
+    boolean slot3 = true; // pos 3 starts with a ball
     boolean colorLocked = false;
     boolean launchNow = false;
+
     String shotColor1 = "empty";
     String shotColor2 = "empty";
     String shotColor3 = "empty";
@@ -148,6 +149,28 @@ public class RedSpindexerAuto extends LinearOpMode {
     public double shotAngle() {
         return SHOT1_ANGLE;
     }
+    private String checkColor() {
+        double clrDiv = 1.82;
+
+        ColorSensor active =
+                (colorSensor1.alpha() <= colorSensor2.alpha())
+                        ? colorSensor2   // colorSensor1 is dimmer → colorSensor2 is active
+                        : colorSensor1;  // colorSensor2 is dimmer → colorSensor1 is active
+
+        // No ring present
+        if (active.alpha() > 105) {
+            return "empty";
+        }
+
+        // Ring present — classify color
+        if (active.green() / clrDiv > active.red()) {
+            return "green";
+        } else if (active.green() / clrDiv < active.red()) {
+            return "purple";
+        } else {
+            return "empty"; // edge case: exactly equal
+        }
+    }
 
 
     void launch(boolean shotRequested) {
@@ -177,6 +200,44 @@ public class RedSpindexerAuto extends LinearOpMode {
                 break;
         }
     }
+    private void updateSpindexer() {
+        if (pos == 1) {
+            targetPos = 0;
+        } else if (pos == 2) {
+            targetPos = 180;
+        } else if (pos == 3) {
+            targetPos = 360;
+        }
+
+        spindexer.setTargetPosition(targetPos);
+        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spindexer.setPower(1.0);
+    }
+    private boolean chamberHasBall() {
+        if (pos == 1) return slot1;
+        if (pos == 2) return slot2;
+        if (pos == 3) return slot3;
+        return false;
+    }
+
+    private void markSlotEmpty() {
+        if (pos == 1) slot1 = false;
+        if (pos == 2) slot2 = false;
+        if (pos == 3) slot3 = false;
+    }
+
+    private void rotateToNextBall() {
+        for (int i = 0; i < 3; i++) {
+            if (chamberHasBall()) return;
+            pos++;
+            if (pos > 3) pos = 1;
+            updateSpindexer();
+            sleep(300);
+        }
+        telemetry.addData("Spindexer", "No balls remaining");
+        telemetry.update();
+    }
+
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -188,10 +249,10 @@ public class RedSpindexerAuto extends LinearOpMode {
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         gate = hardwareMap.get(Servo.class, "gate");
         spindexer = hardwareMap.get(DcMotorEx.class, "spindexer");
-        leftFrontDrive = hardwareMap.get(DcMotor.class, "leftFrontDrive");
-        rightFrontDrive = hardwareMap.get(DcMotor.class, "rightFrontDrive");
-        leftBackDrive = hardwareMap.get(DcMotor.class, "leftBackDrive");
-        rightBackDrive = hardwareMap.get(DcMotor.class, "rightBackDrive");
+        left_front_drive = hardwareMap.get(DcMotor.class, "left_front_drive");
+        right_front_drive = hardwareMap.get(DcMotor.class, "right_front_drive");
+        left_back_drive = hardwareMap.get(DcMotor.class, "left_back_drive");
+        right_back_drive = hardwareMap.get(DcMotor.class, "right_back_drive");
         colorSensor1 = hardwareMap.get(ColorSensor.class, "color1");
         colorSensor2 = hardwareMap.get(ColorSensor.class, "color2");
 
@@ -240,6 +301,14 @@ public class RedSpindexerAuto extends LinearOpMode {
                                 .setTangent(Math.toRadians(START_TRAVEL_DIRECTION*blueAuto()))
                                 .afterTime(START_SERVO,new ParallelAction())
                                 .splineToLinearHeading(shotPose, Math.toRadians(END_TRAVEL_DIRECTION*blueAuto()))
+                                .stopAndAdd(packet -> {
+                                    rotateToNextBall();
+                                    // shoot here
+                                    markSlotEmpty();
+                                    telemetry.addData("pos", pos);
+                                    telemetry.update();
+                                    return false;
+                                })
                                 .waitSeconds(SHOOT_SLEEP1)
                                 .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(FIRST_PICKUP_X, PICKUP_Y*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))

@@ -110,7 +110,7 @@ public class RealSpindexerAutoCode extends LinearOpMode {
     ElapsedTime driveTimer = new ElapsedTime();
     ElapsedTime noColorTimer = new ElapsedTime();
     ElapsedTime delayTimer = new ElapsedTime();
-    private Launcher launcherSystem =
+    private Launcher launcherSystem;
 
 
 
@@ -178,7 +178,7 @@ public class RealSpindexerAutoCode extends LinearOpMode {
         GoBildaPinpointDriver driver = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         driver.resetPosAndIMU();
 
-        Launcher launcherSystem = new Launcher(
+        launcherSystem = new Launcher(
                 launcher,
                 gate,
                 LAUNCH_VELOCITY,
