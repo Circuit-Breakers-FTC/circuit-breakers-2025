@@ -92,9 +92,9 @@ public class RedSpindexerAuto extends LinearOpMode {
     boolean sucking = false;
     boolean collectDriving = false;
     int v1 = 0;
-    boolean slot1 = true; // pos 1 starts with a ball
-    boolean slot2 = true; // pos 2 starts with a ball
-    boolean slot3 = true; // pos 3 starts with a ball
+    String pos1_Color = "Green"; // pos 1 starts with a ball
+    String pos2_Color = "Green"; // pos 2 starts with a ball
+    String pos3_Color = "Green";
     boolean colorLocked = false;
     boolean launchNow = false;
 
@@ -172,6 +172,26 @@ public class RedSpindexerAuto extends LinearOpMode {
         }
     }
 
+ private void shoot() {
+     launcher.setVelocity(-1410);
+     while (launcher.getVelocity() > -1400 && opModeIsActive()) {
+         telemetry.addData("Launcher Speed", launcher.getVelocity());
+         telemetry.addData("Status", "Spinning up...");
+         telemetry.update();
+     }
+
+     // Only gets here once velocity is reached
+     telemetry.addData("Status", "Ready!");
+     telemetry.update();
+     intake.setPower(-0.9);
+     gate.setPosition(0.5);
+     // wait 500ms using ElapsedTime instead of sleep()
+     ElapsedTime timer = new ElapsedTime();
+     while (timer.milliseconds() < 500 && opModeIsActive()) {
+         // just waiting
+     }
+     gate.setPosition(0.75);
+ }
 
     void launch(boolean shotRequested) {
         switch (launchState) {
@@ -213,30 +233,9 @@ public class RedSpindexerAuto extends LinearOpMode {
         spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         spindexer.setPower(1.0);
     }
-    private boolean chamberHasBall() {
-        if (pos == 1) return slot1;
-        if (pos == 2) return slot2;
-        if (pos == 3) return slot3;
-        return false;
-    }
 
-    private void markSlotEmpty() {
-        if (pos == 1) slot1 = false;
-        if (pos == 2) slot2 = false;
-        if (pos == 3) slot3 = false;
-    }
 
-    private void rotateToNextBall() {
-        for (int i = 0; i < 3; i++) {
-            if (chamberHasBall()) return;
-            pos++;
-            if (pos > 3) pos = 1;
-            updateSpindexer();
-            sleep(300);
-        }
-        telemetry.addData("Spindexer", "No balls remaining");
-        telemetry.update();
-    }
+
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -301,11 +300,17 @@ public class RedSpindexerAuto extends LinearOpMode {
                                 .afterTime(START_SERVO,new ParallelAction())
                                 .splineToLinearHeading(shotPose, Math.toRadians(END_TRAVEL_DIRECTION*blueAuto()))
                                 .stopAndAdd(packet -> {
-                                    rotateToNextBall();
-                                    // shoot here
-                                    markSlotEmpty();
+                                    pos = 1;
+                                    updateSpindexer();
+                                    shoot();
                                     telemetry.addData("pos", pos);
                                     telemetry.update();
+                                    pos = 2;
+                                    updateSpindexer();
+                                    shoot();
+                                    pos=3;
+                                    updateSpindexer();
+                                    shoot();
                                     return false;
                                 })
                                 .waitSeconds(SHOOT_SLEEP1)
