@@ -238,7 +238,6 @@ public class RedSpindexerAuto extends LinearOpMode {
         telemetry.update();
     }
 
-
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry.addData("Status", "Initializing...");
