@@ -75,6 +75,7 @@ public class RedSpindexerAuto extends LinearOpMode {
     public static double END_AUTO_Y = 8;
     public static double END_AUTO_X = -39;
     public static double END_AUTO_ANGLE = 115;
+    public static double spin_Sleep = 500;
     public static double SHOOT_SLEEP1 = 2.5;
     public static double SHOOT_SLEEP2 = 3;
     public static double SHOOT_SLEEP3 = 3;
@@ -92,9 +93,9 @@ public class RedSpindexerAuto extends LinearOpMode {
     boolean sucking = false;
     boolean collectDriving = false;
     int v1 = 0;
-    String pos1_Color = "Green"; // pos 1 starts with a ball
-    String pos2_Color = "Green"; // pos 2 starts with a ball
-    String pos3_Color = "Green";
+    String pos1_Color = "green"; // pos 1 starts with a ball
+    String pos2_Color = "green"; // pos 2 starts with a ball
+    String pos3_Color = "green"; //pos 3 starts with with a ball
     boolean colorLocked = false;
     boolean launchNow = false;
 
@@ -149,6 +150,7 @@ public class RedSpindexerAuto extends LinearOpMode {
     public double shotAngle() {
         return SHOT1_ANGLE;
     }
+
     private String checkColor() {
         double clrDiv = 1.82;
 
@@ -172,54 +174,148 @@ public class RedSpindexerAuto extends LinearOpMode {
         }
     }
 
- private void shoot() {
-     launcher.setVelocity(-1410);
-     while (launcher.getVelocity() > -1400 && opModeIsActive()) {
-         telemetry.addData("Launcher Speed", launcher.getVelocity());
-         telemetry.addData("Status", "Spinning up...");
-         telemetry.update();
-     }
+    private void shoot() {
 
-     // Only gets here once velocity is reached
-     telemetry.addData("Status", "Ready!");
-     telemetry.update();
-     intake.setPower(-0.9);
-     gate.setPosition(0.5);
-     // wait 500ms using ElapsedTime instead of sleep()
-     ElapsedTime timer = new ElapsedTime();
-     while (timer.milliseconds() < 500 && opModeIsActive()) {
-         // just waiting
-     }
-     gate.setPosition(0.75);
- }
-
-    void launch(boolean shotRequested) {
-        switch (launchState) {
-            case IDLE:
-                if (shotRequested) launchState = LaunchState.SPIN_UP;
-                break;
-            case SPIN_UP:
-                launcher.setVelocity(-LAUNCHER_TARGET_VELOCITY);
-                if (launcher.getVelocity() < -LAUNCHER_MIN_VELOCITY && feederTimer.seconds() > TIME_BETWEEN_SHOTS)
-                    launchState = LaunchState.ROTATE;
-                break;
-            case ROTATE:
-                launchState = LaunchState.LAUNCH;
-            case LAUNCH:
-                gateTimer.reset();
-                if (v1 > 0) gatePressed = true;
-                feederTimer.reset();
-                launchState = LaunchState.LAUNCHING;
-                break;
-            case LAUNCHING:
-                if (feederTimer.seconds() > FEED_TIME_SECONDS) {
-                    if (v1 == 3) v1 = 0;
-                    v1 += 1;
-                    launchState = LaunchState.IDLE;
-                }
-                break;
+        while (launcher.getVelocity() > -1400 && opModeIsActive()) {
+            telemetry.addData("Launcher Speed", launcher.getVelocity());
+            telemetry.addData("Status", "Spinning up...");
+            telemetry.update();
         }
+
+        // Only gets here once velocity is reached
+        telemetry.addData("Status", "Ready!");
+        telemetry.update();
+        intake.setPower(-0.9);
+        gate.setPosition(0.5);
+        // wait 500ms using ElapsedTime instead of sleep()
+        ElapsedTime timer = new ElapsedTime();
+        while (timer.milliseconds() < 500 && opModeIsActive()) {
+            // just waiting
+        }
+        if (pos == 1) {
+            pos1_Color = "empty";
+        } else {
+            if (pos == 2) {
+                pos2_Color = "empty";
+            } else {
+                if (pos == 3) {
+                    pos3_Color = "empty";
+                }
+            }
+        }
+        gate.setPosition(0.75);
     }
+
+    private void go_To_Green() {
+        if (pos1_Color.equals("green")) {
+            pos = 1;
+        }
+        else if (pos2_Color.equals("green")) {
+            pos = 2;
+        }
+        else if (pos3_Color.equals("green")) {
+            pos = 3;
+        }
+        else if (pos1_Color.equals("purple")) {
+            pos = 1;
+        }
+        else if (pos2_Color.equals("purple")) {
+            pos = 2;
+        }
+        else if (pos3_Color.equals("purple")) {
+            pos = 3;
+        }
+        else {
+            telemetry.addData("giving up", pos);
+            telemetry.update();
+            return;
+        }
+
+        updateSpindexer();
+
+    }
+
+    private void go_To_Purple() {
+        if (pos1_Color.equals("green")) {
+            pos = 1;
+        }
+        else if (pos2_Color.equals("green")) {
+            pos = 2;
+        }
+        else if (pos3_Color.equals("green")) {
+            pos = 3;
+        }
+        else if (pos1_Color.equals("purple")) {
+            pos = 1;
+        }
+        else if (pos2_Color.equals("purple")) {
+            pos = 2;
+        }
+        else if (pos3_Color.equals("purple")) {
+            pos = 3;
+        }
+        else {
+            telemetry.addData("giving up", pos);
+            telemetry.update();
+            return;
+        }
+
+        updateSpindexer();
+
+    }
+
+
+    /* void launch(boolean shotRequested) {
+         switch (launchState) {
+             case IDLE:
+                 if (shotRequested) launchState = LaunchState.SPIN_UP;
+                 break;
+             case SPIN_UP:
+                 launcher.setVelocity(-LAUNCHER_TARGET_VELOCITY);
+                 if (launcher.getVelocity() < -LAUNCHER_MIN_VELOCITY && feederTimer.seconds() > TIME_BETWEEN_SHOTS)
+                     launchState = LaunchState.ROTATE;
+                 break;
+             case ROTATE:
+                 launchState = LaunchState.LAUNCH;
+             case LAUNCH:
+                 gateTimer.reset();
+                 if (v1 > 0) gatePressed = true;
+                 feederTimer.reset();
+                 launchState = LaunchState.LAUNCHING;
+                 break;
+             case LAUNCHING:
+                 if (feederTimer.seconds() > FEED_TIME_SECONDS) {
+                     if (v1 == 3) v1 = 0;
+                     v1 += 1;
+                     launchState = LaunchState.IDLE;
+                 }
+                 break;
+         }
+     }
+     */
+    private void intake() {
+
+        String detectedColor = checkColor();
+
+        if (!detectedColor.equals("empty")) {
+
+
+            if (pos == 1) {
+                pos1_Color = detectedColor;
+            } else if (pos == 2) {
+                pos2_Color = detectedColor;
+            } else if (pos == 3) {
+                pos3_Color = detectedColor;
+            }
+
+            telemetry.addData("Stored in Slot", pos);
+            telemetry.addData("Color", detectedColor);
+            telemetry.update();
+        }
+
+
+    }
+
     private void updateSpindexer() {
         if (pos == 1) {
             targetPos = 0;
@@ -234,7 +330,18 @@ public class RedSpindexerAuto extends LinearOpMode {
         spindexer.setPower(1.0);
     }
 
+    private class IntakeAction implements Action {
 
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+
+            intake();   // call your intake function every loop
+
+            return opModeIsActive();
+            // returning true keeps it running
+            // returning false would stop it
+        }
+    }
 
 
     @Override
@@ -255,12 +362,12 @@ public class RedSpindexerAuto extends LinearOpMode {
         colorSensor2 = hardwareMap.get(ColorSensor.class, "color2");
 
         // --- INITIAL POSITIONS ---
-        Pose2d beginPose = new Pose2d(62.5,16.5*blueAuto(), Math.toRadians(90*blueAuto()));
-        Pose2d shotPose = new Pose2d(SHOT1_X, SHOT1_Y*blueAuto(), Math.toRadians(shotAngle()));
-        Pose2d pickup1Pose = new Pose2d(FIRST_PICKUP_X, PICKUP_Y*blueAuto(), Math.toRadians(90*blueAuto()));
-        Pose2d intake1Pose = new Pose2d(FIRST_INTAKE_X, INTAKE_Y*blueAuto(), Math.toRadians(90*blueAuto()));
-        Pose2d pickup2Pose = new Pose2d(SECOND_PICKUP_X, PICKUP_Y*blueAuto(), Math.toRadians(90*blueAuto()));
-        Pose2d intake2Pose = new Pose2d(SECOND_INTAKE_X, INTAKE_Y*blueAuto(), Math.toRadians(90*blueAuto()));
+        Pose2d beginPose = new Pose2d(62.5, 16.5 * blueAuto(), Math.toRadians(90 * blueAuto()));
+        Pose2d shotPose = new Pose2d(SHOT1_X, SHOT1_Y * blueAuto(), Math.toRadians(shotAngle()));
+        Pose2d pickup1Pose = new Pose2d(FIRST_PICKUP_X, PICKUP_Y * blueAuto(), Math.toRadians(90 * blueAuto()));
+        Pose2d intake1Pose = new Pose2d(FIRST_INTAKE_X, INTAKE_Y * blueAuto(), Math.toRadians(90 * blueAuto()));
+        Pose2d pickup2Pose = new Pose2d(SECOND_PICKUP_X, PICKUP_Y * blueAuto(), Math.toRadians(90 * blueAuto()));
+        Pose2d intake2Pose = new Pose2d(SECOND_INTAKE_X, INTAKE_Y * blueAuto(), Math.toRadians(90 * blueAuto()));
 
         // Setup MecanumDrive & Pinpoint Driver
         MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
@@ -290,45 +397,46 @@ public class RedSpindexerAuto extends LinearOpMode {
         waitForStart();
         telemetry.addLine("Starting");
         telemetry.update();
-
+        launcher.setVelocity(-1410);
         // --- Main Auto Trajectory ---
         Actions.runBlocking(
+
                 new ParallelAction(
+                        new IntakeAction(),  // ← THIS runs entire time
                         new MotorPowerAction(intake, -0.9),
                         drive.actionBuilder(beginPose)
-                                .setTangent(Math.toRadians(START_TRAVEL_DIRECTION*blueAuto()))
-                                .afterTime(START_SERVO,new ParallelAction())
-                                .splineToLinearHeading(shotPose, Math.toRadians(END_TRAVEL_DIRECTION*blueAuto()))
+                                .setTangent(Math.toRadians(START_TRAVEL_DIRECTION * blueAuto()))
+                                .afterTime(START_SERVO, new ParallelAction())
+                                .splineToLinearHeading(shotPose, Math.toRadians(END_TRAVEL_DIRECTION * blueAuto()))
                                 .stopAndAdd(packet -> {
-                                    pos = 1;
-                                    updateSpindexer();
+                                    //ex, will make camera plus aprial tag system
+                                    go_To_Green();
                                     shoot();
-                                    telemetry.addData("pos", pos);
-                                    telemetry.update();
-                                    pos = 2;
-                                    updateSpindexer();
+
+                                    go_To_Green();
                                     shoot();
-                                    pos=3;
-                                    updateSpindexer();
+
+                                    go_To_Green();
                                     shoot();
+                                   //need to add timers
                                     return false;
                                 })
                                 .waitSeconds(SHOOT_SLEEP1)
-                                .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
-                                .strafeToLinearHeading(new Vector2d(FIRST_PICKUP_X, PICKUP_Y*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
-                                .strafeTo(new Vector2d(FIRST_INTAKE_X, INTAKE_Y*blueAuto()))
-                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(shotAngle()))
+                                .setTangent(Math.toRadians(PICKUP_ANGLE * blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(FIRST_PICKUP_X, PICKUP_Y * blueAuto()), Math.toRadians(PICKUP_ANGLE * blueAuto()))
+                                .strafeTo(new Vector2d(FIRST_INTAKE_X, INTAKE_Y * blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y * blueAuto()), Math.toRadians(shotAngle()))
                                 .waitSeconds(SHOOT_SLEEP2)
-                                .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
-                                .strafeToLinearHeading(new Vector2d(SECOND_PICKUP_X, PICKUP_Y*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
-                                .strafeTo(new Vector2d(SECOND_INTAKE_X, INTAKE_Y2*blueAuto()))
-                                .strafeTo(new Vector2d(SECOND_INTAKE_X,TWO_CYCLE_BACKUP_Y*blueAuto()))
-                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(shotAngle()))
+                                .setTangent(Math.toRadians(PICKUP_ANGLE * blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(SECOND_PICKUP_X, PICKUP_Y * blueAuto()), Math.toRadians(PICKUP_ANGLE * blueAuto()))
+                                .strafeTo(new Vector2d(SECOND_INTAKE_X, INTAKE_Y2 * blueAuto()))
+                                .strafeTo(new Vector2d(SECOND_INTAKE_X, TWO_CYCLE_BACKUP_Y * blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y * blueAuto()), Math.toRadians(shotAngle()))
                                 .waitSeconds(SHOOT_SLEEP3)
-                                .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
-                                .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, THIRD_PICKUP_Y*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
-                                .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, THIRDPICKUPEND*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
-                                .strafeToLinearHeading(new Vector2d(END_AUTO_X, END_AUTO_Y*blueAuto()), Math.toRadians(END_AUTO_ANGLE*blueAuto()))
+                                .setTangent(Math.toRadians(PICKUP_ANGLE * blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, THIRD_PICKUP_Y * blueAuto()), Math.toRadians(PICKUP_ANGLE * blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, THIRDPICKUPEND * blueAuto()), Math.toRadians(PICKUP_ANGLE * blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(END_AUTO_X, END_AUTO_Y * blueAuto()), Math.toRadians(END_AUTO_ANGLE * blueAuto()))
                                 .waitSeconds(5)
                                 .build()
                 )
