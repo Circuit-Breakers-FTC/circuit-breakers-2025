@@ -408,36 +408,107 @@ public class RedSpindexerAuto extends LinearOpMode {
                                 .setTangent(Math.toRadians(START_TRAVEL_DIRECTION * blueAuto()))
                                 .afterTime(START_SERVO, new ParallelAction())
                                 .splineToLinearHeading(shotPose, Math.toRadians(END_TRAVEL_DIRECTION * blueAuto()))
+                                //i am using purple purple green for this EX
                                 .stopAndAdd(packet -> {
                                     //ex, will make camera plus aprial tag system
                                     go_To_Green();
                                     shoot();
-
-                                    go_To_Green();
-                                    shoot();
-
-                                    go_To_Green();
-                                    shoot();
-                                   //need to add timers
                                     return false;
                                 })
-                                .waitSeconds(SHOOT_SLEEP1)
+                                .waitSeconds(spin_Sleep)//tune this vaible
+                                .stopAndAdd(packet -> {
+                                    //ex, will make camera plus aprial tag system
+                                    go_To_Green();
+                                    shoot();
+                                    return false;
+                                })
+                                .waitSeconds(spin_Sleep)
+                                .stopAndAdd(packet -> {
+                                    //ex, will make camera plus aprial tag system
+                                    go_To_Green();
+                                    shoot();
+                                    return false;
+                                })
+                                .waitSeconds(spin_Sleep)
+
                                 .setTangent(Math.toRadians(PICKUP_ANGLE * blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(FIRST_PICKUP_X, PICKUP_Y * blueAuto()), Math.toRadians(PICKUP_ANGLE * blueAuto()))
                                 .strafeTo(new Vector2d(FIRST_INTAKE_X, INTAKE_Y * blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y * blueAuto()), Math.toRadians(shotAngle()))
-                                .waitSeconds(SHOOT_SLEEP2)
+                                //for this example i am using purple, purple, green but i will make a april tag shooting program
+                                .stopAndAdd(packet -> {
+                                    //ex, will make camera plus aprial tag system
+                                    go_To_Purple();
+                                    shoot();
+                                    return false;
+                                })
+                                .waitSeconds(spin_Sleep)//tune this vaible
+                                .stopAndAdd(packet -> {
+                                    //ex, will make camera plus aprial tag system
+                                    go_To_Purple();
+                                    shoot();
+                                    return false;
+                                })
+                                .waitSeconds(spin_Sleep)
+                                .stopAndAdd(packet -> {
+                                    //ex, will make camera plus aprial tag system
+                                    go_To_Green();
+                                    shoot();
+                                    return false;
+                                })
+                                .waitSeconds(spin_Sleep)
                                 .setTangent(Math.toRadians(PICKUP_ANGLE * blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(SECOND_PICKUP_X, PICKUP_Y * blueAuto()), Math.toRadians(PICKUP_ANGLE * blueAuto()))
                                 .strafeTo(new Vector2d(SECOND_INTAKE_X, INTAKE_Y2 * blueAuto()))
                                 .strafeTo(new Vector2d(SECOND_INTAKE_X, TWO_CYCLE_BACKUP_Y * blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y * blueAuto()), Math.toRadians(shotAngle()))
-                                .waitSeconds(SHOOT_SLEEP3)
+                                .stopAndAdd(packet -> {
+                                    //ex, will make camera plus aprial tag system
+                                    go_To_Purple();
+                                    shoot();
+                                    return false;
+                                })
+                                .waitSeconds(spin_Sleep)//tune this vaible
+                                .stopAndAdd(packet -> {
+                                    //ex, will make camera plus aprial tag system
+                                    go_To_Purple();
+                                    shoot();
+                                    return false;
+                                })
+                                .waitSeconds(spin_Sleep)
+                                .stopAndAdd(packet -> {
+                                    //ex, will make camera plus aprial tag system
+                                    go_To_Green();
+                                    shoot();
+                                    return false;
+                                })
+                                .waitSeconds(spin_Sleep)
                                 .setTangent(Math.toRadians(PICKUP_ANGLE * blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, THIRD_PICKUP_Y * blueAuto()), Math.toRadians(PICKUP_ANGLE * blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, THIRDPICKUPEND * blueAuto()), Math.toRadians(PICKUP_ANGLE * blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(END_AUTO_X, END_AUTO_Y * blueAuto()), Math.toRadians(END_AUTO_ANGLE * blueAuto()))
-                                .waitSeconds(5)
+                                .stopAndAdd(packet -> {
+                                    //ex, will make camera plus aprial tag system
+                                    go_To_Purple();
+                                    shoot();
+                                    return false;
+                                })
+                                .waitSeconds(spin_Sleep)//tune this vaible
+                                .stopAndAdd(packet -> {
+                                    //ex, will make camera plus aprial tag system
+                                    go_To_Purple();
+                                    shoot();
+                                    return false;
+                                })
+                                .waitSeconds(spin_Sleep)
+                                .stopAndAdd(packet -> {
+                                    //ex, will make camera plus aprial tag system
+                                    go_To_Green();
+                                    shoot();
+                                    return false;
+                                })
+                                .waitSeconds(spin_Sleep)
+
                                 .build()
                 )
         );
