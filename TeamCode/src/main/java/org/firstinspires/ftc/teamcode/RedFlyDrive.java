@@ -28,12 +28,16 @@ import java.util.List;
 @Config
 public class RedFlyDrive extends LinearOpMode {
 
-    public static double LAUNCH_VELOCITY = 2000;
+    public static double LAUNCH_VELOCITY = 1300;
     public static double TAG_DIST_AT_2400 = 105.0;
-    public static double TAG_SLOPE = 8.0;
-    public static double TAG_MIN_VEL = 1800;
+    public static double TAG_SLOPE = 21.97;
+    public static double TAG_MIN_VEL = 900;
     public static double TAG_MAX_VEL = 3600;
     public static int cycleMotorSpeed = 6000;
+    private double lastValidVelocity = LAUNCH_VELOCITY;
+    public static double SPIN_MODIFIER = 1;
+
+
 
     private DcMotor frontRight, frontLeft, rearRight, rearLeft, intake;
     private DcMotorEx launchLeft, launchRight, cycleMotor;
@@ -166,7 +170,7 @@ public class RedFlyDrive extends LinearOpMode {
 
             if (launcher) {
                 double shooterVel = getShooterVelocityFromAprilTag();
-                launchLeft.setVelocity(shooterVel);
+                launchLeft.setVelocity(shooterVel * SPIN_MODIFIER);
                 launchRight.setVelocity(shooterVel);
                 cycleMotor.setVelocity(cycleMotorSpeed);
             } else {
@@ -175,27 +179,42 @@ public class RedFlyDrive extends LinearOpMode {
                 cycleMotor.setVelocity(0);
             }
 
-            telemetry.addData("Shooter Velocity", launchLeft.getVelocity());
+
+            telemetry.addData("Left Vel", launchLeft.getVelocity());
+            telemetry.addData("Right Vel", launchRight.getVelocity());
             telemetry.addData("Cycle Motor Vel", cycleMotor.getVelocity());
             telemetry.update();
         }
     }
 
     private double getShooterVelocityFromAprilTag() {
+
         List<AprilTagDetection> detections = aprilTag.getDetections();
 
-        if (detections.isEmpty()) {
-            return LAUNCH_VELOCITY;
+        for (AprilTagDetection detection : detections) {
+
+            // Only use tag ID 20 or 24
+            if (detection.id == 20 || detection.id == 24) {
+
+                double distance = detection.ftcPose.range;
+
+                double velocity = distance * TAG_SLOPE;
+
+                velocity = Math.max(TAG_MIN_VEL, Math.min(TAG_MAX_VEL, velocity));
+
+                telemetry.addData("Tag ID", detection.id);
+                telemetry.addData("Tag Distance (in)", distance);
+                telemetry.addData("Auto Shooter Vel", velocity);
+
+                lastValidVelocity = velocity;   // Save it
+                return velocity;
+            }
         }
 
-        double distance = detections.get(0).ftcPose.range;
-
-        double velocity = 2400 + (distance - TAG_DIST_AT_2400) * TAG_SLOPE;
-        velocity = Math.max(TAG_MIN_VEL, Math.min(TAG_MAX_VEL, velocity));
-
-        telemetry.addData("Tag Distance (in)", distance);
-        telemetry.addData("Auto Shooter Vel", velocity);
-
-        return velocity;
+        // No valid tag → use last known good velocity
+        return lastValidVelocity;
     }
+
+
+
 }
