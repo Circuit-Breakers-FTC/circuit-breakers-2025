@@ -300,17 +300,22 @@ public class RedSpindexerAuto extends LinearOpMode {
         if (!detectedColor.equals("empty")) {
 
 
-            if (pos == 1) {
+            if (pos == 1 && pos1_Color.equals("empty")) {
                 pos1_Color = detectedColor;
-            } else if (pos == 2) {
+                telemetry.addData("Stored in Slot", pos);
+                telemetry.addData("Color", detectedColor);
+                telemetry.update();
+            } else if (pos == 2 && pos2_Color.equals("empty")) {
                 pos2_Color = detectedColor;
-            } else if (pos == 3) {
+                telemetry.addData("Stored in Slot", pos);
+                telemetry.addData("Color", detectedColor);
+                telemetry.update();
+            } else if (pos == 3 && pos3_Color.equals("empty")) {
                 pos3_Color = detectedColor;
+                telemetry.addData("Stored in Slot", pos);
+                telemetry.addData("Color", detectedColor);
+                telemetry.update();
             }
-
-            telemetry.addData("Stored in Slot", pos);
-            telemetry.addData("Color", detectedColor);
-            telemetry.update();
         }
 
 
@@ -329,12 +334,37 @@ public class RedSpindexerAuto extends LinearOpMode {
         spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         spindexer.setPower(1.0);
     }
+    private boolean autoRotateEnabled = false;
 
+    private void autoRotateToEmpty() {
+        if (!autoRotateEnabled) return;
+
+        // Check if current pos slot is empty, if not rotate to find one
+        for (int i = 0; i < 3; i++) {
+            String currentColor;
+            if (pos == 1) currentColor = pos1_Color;
+            else if (pos == 2) currentColor = pos2_Color;
+            else currentColor = pos3_Color;
+
+            if (currentColor.equals("empty")) {
+                updateSpindexer(); // already on an empty slot, lock in
+                return;
+            }
+
+            // Current slot is full, try next
+            pos += 1;
+            if (pos > 3) pos = 1;
+        }
+
+        // All slots are full, no empty slot found
+        telemetry.addData("Spindexer", "All slots full, nowhere to rotate");
+        telemetry.update();
+    }
     private class IntakeAction implements Action {
 
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
-
+            autoRotateToEmpty();
             intake();   // call your intake function every loop
 
             return opModeIsActive();
@@ -408,6 +438,10 @@ public class RedSpindexerAuto extends LinearOpMode {
                                 .setTangent(Math.toRadians(START_TRAVEL_DIRECTION * blueAuto()))
                                 .afterTime(START_SERVO, new ParallelAction())
                                 .splineToLinearHeading(shotPose, Math.toRadians(END_TRAVEL_DIRECTION * blueAuto()))
+                                .stopAndAdd(packet -> {
+                                    autoRotateEnabled = false; //with this it will make it so the auto rotate does not do wierd stuff
+                                    return false;
+                                })
                                 //i am using purple purple green for this EX
                                 .stopAndAdd(packet -> {
                                     //ex, will make camera plus aprial tag system
@@ -430,12 +464,19 @@ public class RedSpindexerAuto extends LinearOpMode {
                                     return false;
                                 })
                                 .waitSeconds(spin_Sleep)
-
+                                .stopAndAdd(packet -> {
+                                    autoRotateEnabled = true; //with this it will make it so it can pick up and store artifacts
+                                    return false;
+                                })
                                 .setTangent(Math.toRadians(PICKUP_ANGLE * blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(FIRST_PICKUP_X, PICKUP_Y * blueAuto()), Math.toRadians(PICKUP_ANGLE * blueAuto()))
                                 .strafeTo(new Vector2d(FIRST_INTAKE_X, INTAKE_Y * blueAuto()))
                                 //need to make code that puts the artifacts into storage during intake and intake only
                                 .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y * blueAuto()), Math.toRadians(shotAngle()))
+                                .stopAndAdd(packet -> {
+                                    autoRotateEnabled = false; //with this it will make it so the auto rotate does not do wierd stuff
+                                    return false;
+                                })
                                 //for this example i am using purple, purple, green but i will make a april tag shooting program
                                 .stopAndAdd(packet -> {
                                     //ex, will make camera plus aprial tag system
@@ -458,10 +499,18 @@ public class RedSpindexerAuto extends LinearOpMode {
                                     return false;
                                 })
                                 .waitSeconds(spin_Sleep)
+                                .stopAndAdd(packet -> {
+                                    autoRotateEnabled = true; //with this it will make it so it can pick up and store artifacts
+                                    return false;
+                                })
                                 .setTangent(Math.toRadians(PICKUP_ANGLE * blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(SECOND_PICKUP_X, PICKUP_Y * blueAuto()), Math.toRadians(PICKUP_ANGLE * blueAuto()))
                                 .strafeTo(new Vector2d(SECOND_INTAKE_X, INTAKE_Y2 * blueAuto()))
                                 .strafeTo(new Vector2d(SECOND_INTAKE_X, TWO_CYCLE_BACKUP_Y * blueAuto()))
+                                .stopAndAdd(packet -> {
+                                    autoRotateEnabled = false; //with this it will make it so the auto rotate does not do wierd stuff
+                                    return false;
+                                })
                                 .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y * blueAuto()), Math.toRadians(shotAngle()))
                                 .stopAndAdd(packet -> {
                                     //ex, will make camera plus aprial tag system
@@ -484,10 +533,19 @@ public class RedSpindexerAuto extends LinearOpMode {
                                     return false;
                                 })
                                 .waitSeconds(spin_Sleep)
+                                .waitSeconds(spin_Sleep)
+                                .stopAndAdd(packet -> {
+                                    autoRotateEnabled = true; //with this it will make it so it can pick up and store artifacts
+                                    return false;
+                                })
                                 .setTangent(Math.toRadians(PICKUP_ANGLE * blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, THIRD_PICKUP_Y * blueAuto()), Math.toRadians(PICKUP_ANGLE * blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, THIRDPICKUPEND * blueAuto()), Math.toRadians(PICKUP_ANGLE * blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(END_AUTO_X, END_AUTO_Y * blueAuto()), Math.toRadians(END_AUTO_ANGLE * blueAuto()))
+                                .stopAndAdd(packet -> {
+                                    autoRotateEnabled = true; //with this it will make it so it can pick up and store artifacts
+                                    return false;
+                                })
                                 .stopAndAdd(packet -> {
                                     //ex, will make camera plus aprial tag system
                                     go_To_Purple();
