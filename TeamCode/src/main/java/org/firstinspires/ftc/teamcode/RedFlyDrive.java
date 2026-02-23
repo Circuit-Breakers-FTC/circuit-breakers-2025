@@ -30,7 +30,7 @@ public class RedFlyDrive extends LinearOpMode {
 
     public static double LAUNCH_VELOCITY = 1300;
     public static double TAG_DIST_AT_2400 = 105.0;
-    public static double TAG_SLOPE = 21.97;
+    public static double TAG_SLOPE = 8.333;
     public static double TAG_MIN_VEL = 900;
     public static double TAG_MAX_VEL = 3600;
     public static int cycleMotorSpeed = 6000;
@@ -169,9 +169,9 @@ public class RedFlyDrive extends LinearOpMode {
             if (gamepad2.left_bumper) launcher = !launcher;
 
             if (launcher) {
-                double shooterVel = getShooterVelocityFromAprilTag();
-                launchLeft.setVelocity(shooterVel * SPIN_MODIFIER);
-                launchRight.setVelocity(shooterVel);
+//                double shooterVel = getShooterVelocityFromAprilTag();
+                launchLeft.setVelocity(LAUNCH_VELOCITY);
+                launchRight.setVelocity(LAUNCH_VELOCITY);
                 cycleMotor.setVelocity(cycleMotorSpeed);
             } else {
                 launchLeft.setVelocity(0);
@@ -187,34 +187,43 @@ public class RedFlyDrive extends LinearOpMode {
         }
     }
 
-    private double getShooterVelocityFromAprilTag() {
-
-        List<AprilTagDetection> detections = aprilTag.getDetections();
-
-        for (AprilTagDetection detection : detections) {
-
-            // Only use tag ID 20 or 24
-            if (detection.id == 20 || detection.id == 24) {
-
-                double distance = detection.ftcPose.range;
-
-                double velocity = distance * TAG_SLOPE;
-
-                velocity = Math.max(TAG_MIN_VEL, Math.min(TAG_MAX_VEL, velocity));
-
-                telemetry.addData("Tag ID", detection.id);
-                telemetry.addData("Tag Distance (in)", distance);
-                telemetry.addData("Auto Shooter Vel", velocity);
-
-                lastValidVelocity = velocity;   // Save it
-                return velocity;
-            }
-        }
-
-        // No valid tag → use last known good velocity
-        return lastValidVelocity;
-    }
-
+//    private double getShooterVelocityFromAprilTag() {
+//
+//
+//
+//
+//        List<AprilTagDetection> detections = aprilTag.getDetections();
+//
+//        for (AprilTagDetection detection : detections) {
+//
+//            // Only use tag ID 20 or 24
+//            if (detection.id == 20 || detection.id == 24) {
+//
+//                double distance = detection.ftcPose.range;
+//                double velocity = 0;
+//
+//                if (distance <= 56) {
+//                    velocity = 8.3333 * distance + 833.3333;
+//                } else {
+//                    velocity =  10 * distance + 740;
+//                }
+//
+//
+//                velocity = Math.max(TAG_MIN_VEL, Math.min(TAG_MAX_VEL, velocity));
+//
+//                telemetry.addData("Tag ID", detection.id);
+//                telemetry.addData("Tag Distance (in)", distance);
+//                telemetry.addData("Auto Shooter Vel", velocity);
+//
+//                lastValidVelocity = velocity;   // Save it
+//                return velocity;
+//            }
+//        }
+//
+//        // No valid tag → use last known good velocity
+//        return lastValidVelocity;
+//    }
+//
 
 
 }

@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.actions.MotorPowerAction;
 
 @Autonomous
 @Config
-public class CuberobotRedAuto extends LinearOpMode {
+public class CloseRedAuto extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotorEx intake = null;
     private DcMotorEx launchRight = null;
@@ -50,19 +50,19 @@ public class CuberobotRedAuto extends LinearOpMode {
     public static double SECOND_INTAKE_X = SECOND_PICKUP_X;
     public static double INTAKE_Y = 56;
     public static double INTAKE_Y2 = 62;
-    public static double END_TRAVEL_DIRECTION = -156    ;
-    public static double START_TRAVEL_DIRECTION = 180;
+    public static double END_TRAVEL_DIRECTION = -52.7;
+    public static double START_TRAVEL_DIRECTION = -52.7;
     public static double LAUNCH_VELOCITY = 1350;
     public static double LAUNCH_ACCURACY = 1;
     public static double INTAKE_VELOCITY = -1000;
     public static double TURN_BACK_ON_SERVO = 1.3;
-    public static double TURN_BACK_ON_SERVO2 = 1.6;
+    public static double TURN_BACK_ON_SERVO2 = 2;
     public static double TURN_BACK_ON_SERVO_3 = 2;
     public static double TWO_CYCLE_BACKUP_Y = 56;
     public static double START_SERVO = 1.5;
     public static double INITPOSX = 12;
     public static double INITPOSY = 48;
-    public static double GATEPOSX = 11;
+    public static double GATEPOSX = 10;
     public static double GATEPOSY = 60;
     public static double GATEANGLE = 135;
     public static double WAIT_TIME = 2;
@@ -163,17 +163,34 @@ public class CuberobotRedAuto extends LinearOpMode {
                                 ))
                                 .splineToLinearHeading(shotPose, Math.toRadians(END_TRAVEL_DIRECTION*blueAuto()))
 
-                                /*.stopAndAdd(new ParallelAction(
-                                        new CRServoAction(one, SERVO_SPEED),
-                                        new CRServoAction(two, SERVO_SPEED),
-                                        new CRServoAction(three, SERVO_SPEED),
+
+                                .waitSeconds(SHOOT_SLEEP1)
+                                .afterTime(0,new ParallelAction(
+
+                                        new CRServoAction(four, -0.5),
+                                        new CRServoAction(five, 1),
+                                        new CRServoAction(six, 1)
+                                ))
+                                //first pickup
+                                .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(SECOND_PICKUP_X, PICKUP_Y*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
+                                .strafeTo(new Vector2d(SECOND_INTAKE_X, INTAKE_Y2*blueAuto()))
+                                .strafeTo(new Vector2d(SECOND_INTAKE_X,TWO_CYCLE_BACKUP_Y*blueAuto()))
+                                .afterTime(0,new ParallelAction(
+
+                                        new CRServoAction(four, 0),
+                                        new CRServoAction(five, 0),
+                                        new CRServoAction(six, 0)
+                                ))
+                                .afterTime(TURN_BACK_ON_SERVO2,new ParallelAction(
+
                                         new CRServoAction(four, -1*SERVO_SPEED),
                                         new CRServoAction(five, SERVO_SPEED),
                                         new CRServoAction(six, -1*SERVO_SPEED)
                                 ))
-                                */
-
-                                .waitSeconds(SHOOT_SLEEP1)
+                                .strafeTo(new Vector2d(12,36*blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(shotAngle()))
+                                .waitSeconds(SHOOT_SLEEP3)
                                 // intake mode
 //                                .afterTime(0,new ParallelAction(
 //
@@ -230,7 +247,7 @@ public class CuberobotRedAuto extends LinearOpMode {
                                 ))
                                 .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
                                 .splineToLinearHeading(new Pose2d(INITPOSX, INITPOSY*blueAuto(),Math.toRadians(135)), Math.toRadians(shotAngle()))
-                                .strafeToLinearHeading(new Vector2d(GATEPOSX,GATEPOSY),Math.toRadians(GATEANGLE))
+                                .strafeToLinearHeading(new Vector2d(GATEPOSX,GATEPOSY*blueAuto()),Math.toRadians(GATEANGLE)*blueAuto())
                                 .waitSeconds(WAIT_TIME)
                                 .afterTime(0, packet -> {
                                 packet.put("x pos:", GATEPOSX);
@@ -251,6 +268,7 @@ public class CuberobotRedAuto extends LinearOpMode {
                                         new CRServoAction(five, SERVO_SPEED),
                                         new CRServoAction(six, -1*SERVO_SPEED)
                                 ))
+                                .strafeTo(new Vector2d(12,36*blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(shotAngle()))
                                 .waitSeconds(SHOOT_SLEEP4)
 
@@ -273,18 +291,23 @@ public class CuberobotRedAuto extends LinearOpMode {
 
                                 .afterTime(0,new ParallelAction(
 
-                                        new CRServoAction(four, 0),
-                                        new CRServoAction(five, 0),
-                                        new CRServoAction(six, 0)
+                                        new CRServoAction(four, -0.5),
+                                        new CRServoAction(five, 1),
+                                        new CRServoAction(six, 1)
                                 ))
-                                .afterTime(TURN_BACK_ON_SERVO_3,new ParallelAction(
+                                // First pickup cycle
+                                .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(FIRST_PICKUP_X, PICKUP_Y*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
+                                .strafeTo(new Vector2d(FIRST_INTAKE_X, INTAKE_Y*blueAuto()))
+
+                                .afterTime(TURN_BACK_ON_SERVO,new ParallelAction(
 
                                         new CRServoAction(four, -1*SERVO_SPEED),
                                         new CRServoAction(five, SERVO_SPEED),
                                         new CRServoAction(six, -1*SERVO_SPEED)
                                 ))
                                 .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(shotAngle()))
-                                .waitSeconds(SHOOT_SLEEP4)
+                                .waitSeconds(SHOOT_SLEEP2)
 
 //                                .strafeToLinearHeading(new Vector2d(END_AUTO_X, END_AUTO_Y*blueAuto()), Math.toRadians(END_AUTO_ANGLE*blueAuto()))
 //                                .waitSeconds(5)
