@@ -38,6 +38,7 @@ public class RedSpindexerAuto extends LinearOpMode {
     private ColorSensor colorSensor1;
     private ColorSensor colorSensor2;
     private ElapsedTime runtime = new ElapsedTime();
+    ElapsedTime delayTimer = new ElapsedTime();
 
     // --- Autonomous Constants / Positions ---
     public static double SERVO_SPEED = 0.425;
@@ -66,6 +67,7 @@ public class RedSpindexerAuto extends LinearOpMode {
     public static double TWO_CYCLE_BACKUP_Y = 47;
     public static double START_SERVO = 1.5;
     public boolean intakeOn = false;
+    public boolean colorSeen = false;
 
     // Spindexer additions
     int pos = 1;
@@ -75,7 +77,7 @@ public class RedSpindexerAuto extends LinearOpMode {
     public static double END_AUTO_Y = 8;
     public static double END_AUTO_X = -39;
     public static double END_AUTO_ANGLE = 115;
-    public static double spin_Sleep = 500;
+    public static double spin_Sleep = 1;
     public static double SHOOT_SLEEP1 = 2.5;
     public static double SHOOT_SLEEP2 = 3;
     public static double SHOOT_SLEEP3 = 3;
@@ -118,7 +120,6 @@ public class RedSpindexerAuto extends LinearOpMode {
     ElapsedTime gateTimer = new ElapsedTime();
     ElapsedTime driveTimer = new ElapsedTime();
     ElapsedTime noColorTimer = new ElapsedTime();
-    ElapsedTime delayTimer = new ElapsedTime();
 
     private enum LaunchState {
         IDLE,
@@ -185,13 +186,18 @@ public class RedSpindexerAuto extends LinearOpMode {
         // Only gets here once velocity is reached
         telemetry.addData("Status", "Ready!");
         telemetry.update();
-        intake.setPower(-0.9);
-        gate.setPosition(0.5);
-        // wait 500ms using ElapsedTime instead of sleep()
+        intake.setPower(-1.0);
         ElapsedTime timer = new ElapsedTime();
-        while (timer.milliseconds() < 500 && opModeIsActive()) {
+        while (timer.milliseconds() < 750 && opModeIsActive()) {
             // just waiting
         }
+        gate.setPosition(0.5);
+        // wait 500ms using ElapsedTime instead of sleep()
+        timer.reset();
+        while (timer.milliseconds() < 1250 && opModeIsActive()) {
+            // just waiting
+        }
+        gate.setPosition(0.75);
         if (pos == 1) {
             pos1_Color = "empty";
         } else {
@@ -203,7 +209,7 @@ public class RedSpindexerAuto extends LinearOpMode {
                 }
             }
         }
-        gate.setPosition(0.75);
+
     }
 
     private void go_To_Green() {
@@ -300,24 +306,39 @@ public class RedSpindexerAuto extends LinearOpMode {
         if (!detectedColor.equals("empty")) {
 
 
-            if (pos == 1 && pos1_Color.equals("empty")) {
+            if (pos == 1) {
+                ElapsedTime timer = new ElapsedTime();
+                while (timer.milliseconds() < 250 && opModeIsActive()) {
+                    // just waiting
+                }
                 pos1_Color = detectedColor;
                 telemetry.addData("Stored in Slot", pos);
                 telemetry.addData("Color", detectedColor);
                 telemetry.update();
-            } else if (pos == 2 && pos2_Color.equals("empty")) {
+            } else if (pos == 2) {
+                ElapsedTime timer = new ElapsedTime();
+                while (timer.milliseconds() < 250 && opModeIsActive()) {
+                    // just waiting
+                }
                 pos2_Color = detectedColor;
                 telemetry.addData("Stored in Slot", pos);
                 telemetry.addData("Color", detectedColor);
                 telemetry.update();
-            } else if (pos == 3 && pos3_Color.equals("empty")) {
+            } else if (pos == 3) {
+                ElapsedTime timer = new ElapsedTime();
+                while (timer.milliseconds() < 250 && opModeIsActive()) {
+                    // just waiting
+                }
                 pos3_Color = detectedColor;
                 telemetry.addData("Stored in Slot", pos);
                 telemetry.addData("Color", detectedColor);
                 telemetry.update();
             }
         }
-
+        telemetry.addData("pos 1 color", pos1_Color);
+        telemetry.addData("pos 2 color", pos2_Color);
+        telemetry.addData("pos 3 color", pos3_Color);
+        telemetry.update();
 
     }
 
@@ -336,6 +357,30 @@ public class RedSpindexerAuto extends LinearOpMode {
     }
     private boolean autoRotateEnabled = false;
 
+    private void ballSensor() {
+        if (colorSensor1.alpha()<=colorSensor2.alpha()){
+            if (colorSensor1.alpha()<=105) colorSeen = true;
+            if (colorSensor1.alpha()>105) colorSeen = false;
+        } else {
+            if (colorSensor2.alpha()<=105) colorSeen = true;
+            if (colorSensor2.alpha()>105) colorSeen = false;
+        }
+    }
+
+//    private void spindexerRotateIntake() {
+//        if (colorSeen&&!colorLocked) {
+//            colorLocked=true;
+//            noColorTimer.reset();
+//            delayTimer.reset();
+//        }
+//        if (colorLocked && delayTimer.seconds() >= 0.25) {
+//            pos++;
+//            if (pos > 3) pos = 1;
+//
+//            colorLocked = false;
+//        }
+//
+//    }false
     private void autoRotateToEmpty() {
         if (!autoRotateEnabled) return;
 
@@ -360,12 +405,16 @@ public class RedSpindexerAuto extends LinearOpMode {
         telemetry.addData("Spindexer", "All slots full, nowhere to rotate");
         telemetry.update();
     }
+
+
     private class IntakeAction implements Action {
 
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
             autoRotateToEmpty();
             intake();   // call your intake function every loop
+            ballSensor();
+            //spindexerRotateIntake();
 
             return opModeIsActive();
             // returning true keeps it running
@@ -432,7 +481,7 @@ public class RedSpindexerAuto extends LinearOpMode {
         Actions.runBlocking(
 
                 new ParallelAction(
-                        new IntakeAction(),  // ← THIS runs entire time
+                        new IntakeAction(),  // THIS runs entire time
                         new MotorPowerAction(intake, -0.9),
                         drive.actionBuilder(beginPose)
                                 .setTangent(Math.toRadians(START_TRAVEL_DIRECTION * blueAuto()))
@@ -470,7 +519,7 @@ public class RedSpindexerAuto extends LinearOpMode {
                                 })
                                 .setTangent(Math.toRadians(PICKUP_ANGLE * blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(FIRST_PICKUP_X, PICKUP_Y * blueAuto()), Math.toRadians(PICKUP_ANGLE * blueAuto()))
-                                .strafeTo(new Vector2d(FIRST_INTAKE_X, INTAKE_Y * blueAuto()))
+                                .strafeTo(new Vector2d(FIRST_INTAKE_X, INTAKE_Y * blueAuto()),new MaxVelocity(10))
                                 //need to make code that puts the artifacts into storage during intake and intake only
                                 .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y * blueAuto()), Math.toRadians(shotAngle()))
                                 .stopAndAdd(packet -> {
@@ -505,7 +554,7 @@ public class RedSpindexerAuto extends LinearOpMode {
                                 })
                                 .setTangent(Math.toRadians(PICKUP_ANGLE * blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(SECOND_PICKUP_X, PICKUP_Y * blueAuto()), Math.toRadians(PICKUP_ANGLE * blueAuto()))
-                                .strafeTo(new Vector2d(SECOND_INTAKE_X, INTAKE_Y2 * blueAuto()))
+                                .strafeTo(new Vector2d(SECOND_INTAKE_X, INTAKE_Y2 * blueAuto()),new MaxVelocity(10))
                                 .strafeTo(new Vector2d(SECOND_INTAKE_X, TWO_CYCLE_BACKUP_Y * blueAuto()))
                                 .stopAndAdd(packet -> {
                                     autoRotateEnabled = false; //with this it will make it so the auto rotate does not do wierd stuff
@@ -540,7 +589,7 @@ public class RedSpindexerAuto extends LinearOpMode {
                                 })
                                 .setTangent(Math.toRadians(PICKUP_ANGLE * blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, THIRD_PICKUP_Y * blueAuto()), Math.toRadians(PICKUP_ANGLE * blueAuto()))
-                                .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, THIRDPICKUPEND * blueAuto()), Math.toRadians(PICKUP_ANGLE * blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, THIRDPICKUPEND * blueAuto()), Math.toRadians(PICKUP_ANGLE * blueAuto()),new MaxVelocity(10))
                                 .strafeToLinearHeading(new Vector2d(END_AUTO_X, END_AUTO_Y * blueAuto()), Math.toRadians(END_AUTO_ANGLE * blueAuto()))
                                 .stopAndAdd(packet -> {
                                     autoRotateEnabled = true; //with this it will make it so it can pick up and store artifacts
