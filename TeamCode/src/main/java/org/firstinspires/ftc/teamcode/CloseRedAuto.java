@@ -246,8 +246,8 @@ public class CloseRedAuto extends LinearOpMode {
                                         new CRServoAction(six, 1)
                                 ))
                                 .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
-                                .splineToLinearHeading(new Pose2d(INITPOSX, INITPOSY*blueAuto(),Math.toRadians(135)), Math.toRadians(shotAngle()))
-                                .strafeToLinearHeading(new Vector2d(GATEPOSX,GATEPOSY*blueAuto()),Math.toRadians(GATEANGLE)*blueAuto())
+                                .splineToLinearHeading(new Pose2d(INITPOSX, INITPOSY*blueAuto(),Math.toRadians(135*blueAuto())), Math.toRadians(shotAngle()))
+                                .strafeToLinearHeading(new Vector2d(GATEPOSX,GATEPOSY*blueAuto()),Math.toRadians(GATEANGLE*blueAuto()))
                                 .waitSeconds(WAIT_TIME)
                                 .afterTime(0, packet -> {
                                 packet.put("x pos:", GATEPOSX);
@@ -272,22 +272,7 @@ public class CloseRedAuto extends LinearOpMode {
                                 .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(shotAngle()))
                                 .waitSeconds(SHOOT_SLEEP4)
 
-                                .afterTime(0,new ParallelAction(
 
-                                        new CRServoAction(four, -0.5),
-                                        new CRServoAction(five, 1),
-                                        new CRServoAction(six, 1)
-                                ))
-                                .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
-                                .splineToLinearHeading(new Pose2d(INITPOSX, INITPOSY*blueAuto(),Math.toRadians(135)), Math.toRadians(shotAngle()))
-                                .strafeToLinearHeading(new Vector2d(GATEPOSX,GATEPOSY),Math.toRadians(GATEANGLE))
-                                .waitSeconds(WAIT_TIME)
-                                .afterTime(0, packet -> {
-                                    packet.put("x pos:", GATEPOSX);
-                                    packet.put("y pos:",GATEPOSY);
-                                    packet.put("gate angle:",GATEANGLE);
-                                    return false;
-                                })
 
                                 .afterTime(0,new ParallelAction(
 
