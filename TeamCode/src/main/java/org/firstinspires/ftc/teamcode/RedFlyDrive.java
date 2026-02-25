@@ -2,11 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.teamcode.RedFlyAuto.*;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -14,7 +11,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.vision.VisionPortal;
@@ -49,7 +45,7 @@ public class RedFlyDrive extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
 
     private boolean slowMode = false;
-    private boolean groupOn = true;
+    private boolean shootMode = false;
 
     public double blueAuto() {
         return 1;
@@ -147,10 +143,10 @@ public class RedFlyDrive extends LinearOpMode {
             rearRight.setPower(rearRightPower);
 
             // --- GAMEPAD 2: Servo Group Toggle ---
-            if (gamepad2.a) groupOn = true;
-            if (gamepad2.b) groupOn = false;
+            if (gamepad2.a) shootMode = true;
+            if (gamepad2.b) shootMode = false;
 
-            if (groupOn) {
+            if (shootMode) {
                 four.setPower(-1);
                 five.setPower(1);
                 six.setPower(-1);
@@ -187,43 +183,43 @@ public class RedFlyDrive extends LinearOpMode {
         }
     }
 
-//    private double getShooterVelocityFromAprilTag() {
-//
-//
-//
-//
-//        List<AprilTagDetection> detections = aprilTag.getDetections();
-//
-//        for (AprilTagDetection detection : detections) {
-//
-//            // Only use tag ID 20 or 24
-//            if (detection.id == 20 || detection.id == 24) {
-//
-//                double distance = detection.ftcPose.range;
-//                double velocity = 0;
-//
-//                if (distance <= 56) {
-//                    velocity = 8.3333 * distance + 833.3333;
-//                } else {
-//                    velocity =  10 * distance + 740;
-//                }
-//
-//
-//                velocity = Math.max(TAG_MIN_VEL, Math.min(TAG_MAX_VEL, velocity));
-//
-//                telemetry.addData("Tag ID", detection.id);
-//                telemetry.addData("Tag Distance (in)", distance);
-//                telemetry.addData("Auto Shooter Vel", velocity);
-//
-//                lastValidVelocity = velocity;   // Save it
-//                return velocity;
-//            }
-//        }
-//
-//        // No valid tag → use last known good velocity
-//        return lastValidVelocity;
-//    }
-//
+    private double getShooterVelocityFromAprilTag() {
+
+
+
+
+        List<AprilTagDetection> detections = aprilTag.getDetections();
+
+        for (AprilTagDetection detection : detections) {
+
+            // Only use tag ID 20 or 24
+            if (detection.id == 20 || detection.id == 24) {
+
+                double distance = detection.ftcPose.range;
+                double velocity = 0;
+
+                if (distance <= 56) {
+                    velocity = 8.3333 * distance + 833.3333;
+                } else {
+                    velocity =  10 * distance + 740;
+                }
+
+
+                velocity = Math.max(TAG_MIN_VEL, Math.min(TAG_MAX_VEL, velocity));
+
+                telemetry.addData("Tag ID", detection.id);
+                telemetry.addData("Tag Distance (in)", distance);
+                telemetry.addData("Auto Shooter Vel", velocity);
+
+                lastValidVelocity = velocity;   // Save it
+                return velocity;
+            }
+        }
+
+        // No valid tag → use last known good velocity
+        return lastValidVelocity;
+    }
+
 
 
 }

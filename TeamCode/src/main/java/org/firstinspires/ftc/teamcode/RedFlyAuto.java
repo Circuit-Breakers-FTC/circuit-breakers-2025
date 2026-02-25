@@ -50,8 +50,8 @@ public class RedFlyAuto extends LinearOpMode {
     public static double SECOND_INTAKE_X = SECOND_PICKUP_X;
     public static double INTAKE_Y = 56;
     public static double INTAKE_Y2 = 62;
-    public static double END_TRAVEL_DIRECTION = -156    ;
-    public static double START_TRAVEL_DIRECTION = 180;
+    public static double END_TRAVEL_DIRECTION = -52.7;
+    public static double START_TRAVEL_DIRECTION = -52.7;
     public static double LAUNCH_VELOCITY = 1300;
     public static double LAUNCH_ACCURACY = 1;
     public static double INTAKE_VELOCITY = -1000;
@@ -117,7 +117,7 @@ public class RedFlyAuto extends LinearOpMode {
         launchRight.setDirection(DcMotorEx.Direction.FORWARD);
 
         // --- INITIAL POSITIONS ---
-        Pose2d beginPose = new Pose2d(62.5,16.5*blueAuto(), Math.toRadians(90*blueAuto()));
+        Pose2d beginPose = new Pose2d(-49.5,52*blueAuto(), Math.toRadians(127.3*blueAuto()));
 
         // Bin position/drop off position
         Pose2d shotPose = new Pose2d(SHOT1_X, SHOT1_Y*blueAuto(), Math.toRadians(shotAngle()));
