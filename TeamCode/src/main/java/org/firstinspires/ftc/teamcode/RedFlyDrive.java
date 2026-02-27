@@ -46,6 +46,7 @@ public class RedFlyDrive extends LinearOpMode {
 
     private boolean slowMode = false;
     private boolean shootMode = false;
+    private boolean cameraMode = false;
 
     public double blueAuto() {
         return 1;
@@ -94,6 +95,7 @@ public class RedFlyDrive extends LinearOpMode {
 
         boolean intakeOn = true;
         boolean launcher = true;
+        double shooterVel = 0;
 
         waitForStart();
         runtime.reset();
@@ -143,8 +145,9 @@ public class RedFlyDrive extends LinearOpMode {
             rearRight.setPower(rearRightPower);
 
             // --- GAMEPAD 2: Servo Group Toggle ---
-            if (gamepad2.a) shootMode = true;
-            if (gamepad2.b) shootMode = false;
+            if(gamepad2.a) {shootMode = true; cameraMode = false;}
+            if(gamepad2.b) {shootMode = false; cameraMode = false;}
+            if(gamepad2.right_trigger > 0.25) {shootMode = true; cameraMode = true;}
 
             if (shootMode) {
                 four.setPower(-1);
@@ -165,9 +168,8 @@ public class RedFlyDrive extends LinearOpMode {
             if (gamepad2.left_bumper) launcher = !launcher;
 
             if (launcher) {
-//                double shooterVel = getShooterVelocityFromAprilTag();
-                launchLeft.setVelocity(LAUNCH_VELOCITY);
-                launchRight.setVelocity(LAUNCH_VELOCITY);
+                launchLeft.setVelocity(cameraMode ? getLaunchVelFromTag() : LAUNCH_VELOCITY);
+                launchRight.setVelocity(cameraMode ? getLaunchVelFromTag() : LAUNCH_VELOCITY);
                 cycleMotor.setVelocity(cycleMotorSpeed);
             } else {
                 launchLeft.setVelocity(0);
@@ -183,11 +185,9 @@ public class RedFlyDrive extends LinearOpMode {
         }
     }
 
-    private double getShooterVelocityFromAprilTag() {
+    private double getLaunchVelFromTag() {
 
-
-
-
+        // --- Auto-velocity from april tag ---
         List<AprilTagDetection> detections = aprilTag.getDetections();
 
         for (AprilTagDetection detection : detections) {
