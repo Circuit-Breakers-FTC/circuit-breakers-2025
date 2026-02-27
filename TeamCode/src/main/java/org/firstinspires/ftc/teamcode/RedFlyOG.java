@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.actions.MotorPowerAction;
 
 @Autonomous
 @Config
-public class RedFlyAuto extends LinearOpMode {
+public class RedFlyOG extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotorEx intake = null;
     private DcMotorEx launchRight = null;
@@ -117,13 +117,17 @@ public class RedFlyAuto extends LinearOpMode {
         launchRight.setDirection(DcMotorEx.Direction.FORWARD);
 
         // --- INITIAL POSITIONS ---
-        Pose2d beginPose = new Pose2d(-49.5,52*blueAuto(), Math.toRadians(127.3*blueAuto()));
+        Pose2d beginPose = new Pose2d(62.5,16.5*blueAuto(), Math.toRadians(90*blueAuto()));
 
-        GoBildaPinpointDriver driver = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
-        driver.resetPosAndIMU();
         // Bin position/drop off position
         Pose2d shotPose = new Pose2d(SHOT1_X, SHOT1_Y*blueAuto(), Math.toRadians(shotAngle()));
+        Pose2d pickup1Pose = new Pose2d(FIRST_PICKUP_X, PICKUP_Y*blueAuto(), Math.toRadians(90*blueAuto()));
+        Pose2d intake1Pose = new Pose2d(FIRST_INTAKE_X, INTAKE_Y*blueAuto(), Math.toRadians(90*blueAuto()));
+        Pose2d pickup2Pose = new Pose2d(SECOND_PICKUP_X, PICKUP_Y*blueAuto(), Math.toRadians(90*blueAuto()));
+        Pose2d intake2Pose = new Pose2d(SECOND_INTAKE_X, INTAKE_Y*blueAuto(), Math.toRadians(90*blueAuto()));
         MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
+        GoBildaPinpointDriver driver = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        driver.resetPosAndIMU();
 
         telemetry.addData("Status", "Initialized and Ready");
         telemetry.update();        // Where we start
@@ -243,3 +247,4 @@ public class RedFlyAuto extends LinearOpMode {
         telemetry.update();
     }
 }
+

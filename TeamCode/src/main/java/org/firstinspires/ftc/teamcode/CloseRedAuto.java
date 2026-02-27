@@ -52,7 +52,7 @@ public class CloseRedAuto extends LinearOpMode {
     public static double INTAKE_Y2 = 62;
     public static double END_TRAVEL_DIRECTION = -52.7;
     public static double START_TRAVEL_DIRECTION = -52.7;
-    public static double LAUNCH_VELOCITY = 1350;
+    public static double LAUNCH_VELOCITY = 1300;
     public static double LAUNCH_ACCURACY = 1;
     public static double INTAKE_VELOCITY = -1000;
     public static double TURN_BACK_ON_SERVO = 1.3;
@@ -62,13 +62,13 @@ public class CloseRedAuto extends LinearOpMode {
     public static double START_SERVO = 1.5;
     public static double INITPOSX = 12;
     public static double INITPOSY = 48;
-    public static double GATEPOSX = 10;
-    public static double GATEPOSY = 60;
-    public static double GATEANGLE = 135;
+    public static double GATEPOSX = 10.5;
+    public static double GATEPOSY = 59;
+    public static double GATEANGLE = 120;
     public static double WAIT_TIME = 2;
 
     public static double THIRDPICKUPEND = 60;
-    public static double END_AUTO_Y = 8;
+    public static double END_AUTO_Y = 7;
     public static double END_AUTO_X = -39;
     public static double END_AUTO_ANGLE = 115;
 
@@ -125,15 +125,12 @@ public class CloseRedAuto extends LinearOpMode {
         // --- INITIAL POSITIONS ---
         Pose2d beginPose = new Pose2d(-49.5,52*blueAuto(), Math.toRadians(127.3*blueAuto()));
 
-        // Bin position/drop off position
-        Pose2d shotPose = new Pose2d(SHOT1_X, SHOT1_Y*blueAuto(), Math.toRadians(shotAngle()));
-        Pose2d pickup1Pose = new Pose2d(FIRST_PICKUP_X, PICKUP_Y*blueAuto(), Math.toRadians(90*blueAuto()));
-        Pose2d intake1Pose = new Pose2d(FIRST_INTAKE_X, INTAKE_Y*blueAuto(), Math.toRadians(90*blueAuto()));
-        Pose2d pickup2Pose = new Pose2d(SECOND_PICKUP_X, PICKUP_Y*blueAuto(), Math.toRadians(90*blueAuto()));
-        Pose2d intake2Pose = new Pose2d(SECOND_INTAKE_X, INTAKE_Y*blueAuto(), Math.toRadians(90*blueAuto()));
-        MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
         GoBildaPinpointDriver driver = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         driver.resetPosAndIMU();
+
+        // Bin position/drop off position
+        Pose2d shotPose = new Pose2d(SHOT1_X, SHOT1_Y*blueAuto(), Math.toRadians(shotAngle()));
+        MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
 
         telemetry.addData("Status", "Initialized and Ready");
         telemetry.update();        // Where we start
@@ -182,6 +179,7 @@ public class CloseRedAuto extends LinearOpMode {
                                         new CRServoAction(five, 0),
                                         new CRServoAction(six, 0)
                                 ))
+                                .waitSeconds(0.1)
                                 .afterTime(TURN_BACK_ON_SERVO2,new ParallelAction(
 
                                         new CRServoAction(four, -1*SERVO_SPEED),
@@ -293,6 +291,8 @@ public class CloseRedAuto extends LinearOpMode {
                                 ))
                                 .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(shotAngle()))
                                 .waitSeconds(SHOOT_SLEEP2)
+                                .strafeToLinearHeading(new Vector2d(END_AUTO_X, END_AUTO_Y * blueAuto()), Math.toRadians(END_AUTO_ANGLE * blueAuto()))
+
 
 //                                .strafeToLinearHeading(new Vector2d(END_AUTO_X, END_AUTO_Y*blueAuto()), Math.toRadians(END_AUTO_ANGLE*blueAuto()))
 //                                .waitSeconds(5)

@@ -43,7 +43,7 @@ public class RedFarAuto extends LinearOpMode {
     public static double SHOT1_Y = 12;
     public static double SHOT1_ANGLE = 157;
     public static double FIRST_PICKUP_X = 35.0;
-    public static double PICKUP_Y = 27.5;
+    public static double PICKUP_Y = 35;
     public static double THIRD_PICKUP_Y = 25;
     public static double PICKUP_ANGLE = 90;
     public static double FIRST_INTAKE_X = FIRST_PICKUP_X;
@@ -92,7 +92,7 @@ public class RedFarAuto extends LinearOpMode {
         return 1;
     }
     public double shotAngle() {
-        return SHOT1_ANGLE;
+        return SHOT1_ANGLE*blueAuto();
     }
     public void runOpMode() throws InterruptedException {
         telemetry.addData("Status", "Initializing...");
@@ -119,17 +119,13 @@ public class RedFarAuto extends LinearOpMode {
         launchRight.setDirection(DcMotorEx.Direction.FORWARD);
 
         // --- INITIAL POSITIONS ---
-        Pose2d beginPose = new Pose2d(62.5,16.5*blueAuto(), Math.toRadians(90*blueAuto()));
+        Pose2d beginPose = new Pose2d(62.5,16.5*blueAuto(), Math.toRadians(90));
+        GoBildaPinpointDriver driver = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        driver.resetPosAndIMU();
 
         // Bin position/drop off position
         Pose2d shotPose = new Pose2d(SHOT1_X, SHOT1_Y*blueAuto(), Math.toRadians(shotAngle()));
-        Pose2d pickup1Pose = new Pose2d(FIRST_PICKUP_X, PICKUP_Y*blueAuto(), Math.toRadians(90*blueAuto()));
-        Pose2d intake1Pose = new Pose2d(FIRST_INTAKE_X, INTAKE_Y*blueAuto(), Math.toRadians(90*blueAuto()));
-        Pose2d pickup2Pose = new Pose2d(SECOND_PICKUP_X, PICKUP_Y*blueAuto(), Math.toRadians(90*blueAuto()));
-        Pose2d intake2Pose = new Pose2d(SECOND_INTAKE_X, INTAKE_Y*blueAuto(), Math.toRadians(90*blueAuto()));
         MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
-        GoBildaPinpointDriver driver = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
-        driver.resetPosAndIMU();
 
         telemetry.addData("Status", "Initialized and Ready");
         telemetry.update();        // Where we start
@@ -194,8 +190,8 @@ public class RedFarAuto extends LinearOpMode {
                                         new CRServoAction(five, 1),
                                         new CRServoAction(six, 1)
                                 ))
-                                .strafeToLinearHeading(new Vector2d(human_player_pickup_backup_x,human_player_pickup_backup_y), Math.toRadians(0))
-                                .strafeToLinearHeading(new Vector2d(human_player_pickup_x,human_player_pickup_backup_y), Math.toRadians(0))
+                                .strafeToLinearHeading(new Vector2d(human_player_pickup_backup_x,human_player_pickup_backup_y*blueAuto()), Math.toRadians(0))
+                                .strafeToLinearHeading(new Vector2d(human_player_pickup_x,human_player_pickup_backup_y*blueAuto()), Math.toRadians(0))
 
 
 
