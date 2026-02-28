@@ -182,7 +182,7 @@ public class RedFarAuto extends LinearOpMode {
                                 .setTangent(Math.toRadians(PICKUP_ANGLE * blueAuto()))
                                 .strafeToLinearHeading(new Vector2d(FIRST_PICKUP_X, PICKUP_Y * blueAuto()), Math.toRadians(PICKUP_ANGLE * blueAuto()))
                                 .strafeTo(new Vector2d(FIRST_INTAKE_X, INTAKE_Y * blueAuto()))
-
+                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y * blueAuto()), Math.toRadians(shotAngle()))
                                 .afterTime(TURN_BACK_ON_SERVO, new ParallelAction(
 
                                         new CRServoAction(four, -1 * SERVO_SPEED),

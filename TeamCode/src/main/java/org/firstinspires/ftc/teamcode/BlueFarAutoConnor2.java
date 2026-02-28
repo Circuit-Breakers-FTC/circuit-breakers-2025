@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 @Autonomous
 @Config
-public class BlueFarAutoConnor2 extends RedFarAutoConnor {
+public class BlueFarAutoConnor2 extends RedFarAutoConnor2 {
     @Override public double blueAuto(){
         return -1;
     }
