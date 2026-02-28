@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
-import static org.firstinspires.ftc.teamcode.RedFlyAuto.*;
+import static org.firstinspires.ftc.teamcode.RedTwelveAuto.*;
+import static org.firstinspires.ftc.teamcode.RedTwelveAuto.PICKUP_ANGLE;
+import static org.firstinspires.ftc.teamcode.RedTwelveAuto.PICKUP_Y;
+import static org.firstinspires.ftc.teamcode.RedTwelveAuto.THIRD_PICKUP_X;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
@@ -24,7 +27,7 @@ import java.util.List;
 @Config
 public class RedFlyDrive extends LinearOpMode {
 
-    public static double LAUNCH_VELOCITY = 1300;
+    public static double LAUNCH_VELOCITY = 1120;
     public static double TAG_DIST_AT_2400 = 105.0;
     public static double TAG_SLOPE = 8.333;
     public static double TAG_MIN_VEL = 900;

@@ -8,7 +8,6 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
@@ -22,24 +21,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.actions.CRServoAction;
 import org.firstinspires.ftc.teamcode.actions.MotorActionTargetVelocity;
 import org.firstinspires.ftc.teamcode.actions.MotorPowerAction;
-import org.firstinspires.ftc.vision.VisionPortal;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import java.util.List;
-
-
-
 
 @Autonomous
 @Config
-public class BlueFarAuto extends LinearOpMode {
-
-    private VisionPortal visionPortal;
-    private AprilTagProcessor aprilTag;
-
+public class BlueTwelveAuto extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
-
     private DcMotorEx intake = null;
     private DcMotorEx launchRight = null;
     private DcMotorEx launchLeft = null;
@@ -48,55 +34,42 @@ public class BlueFarAuto extends LinearOpMode {
     private CRServo four = null;
     private CRServo five = null;
     private CRServo six = null;
-    private CRServo zero = null;
-    public static double human_player_pickup_backup_x = 35;
-    public static double human_player_pickup_backup_y = 65;
-    public static double human_player_pickup_x = 65;
+
     public static double SERVO_SPEED = 0.425;
-    public static double SHOT1_X = 50;
-    public static double SHOT1_Y = 12;
-    public static double SHOT1_ANGLE = 160;
-    public static double FIRST_PICKUP_X = 25;
-    public static double PICKUP_Y = 35;
-    public static double THIRD_PICKUP_Y = 25;
+    public static double SHOT1_X = -17.5;
+    public static double SHOT1_Y = 13.5;
+    public static double SHOT1_ANGLE = -1135;
+    public static double FIRST_PICKUP_X = -10.0;
+    public static double PICKUP_Y = 26;
+    public static double THIRD_PICKUP_Y = 35;
     public static double PICKUP_ANGLE = 90;
     public static double FIRST_INTAKE_X = FIRST_PICKUP_X;
     public static double SECOND_PICKUP_X = 12;
     public static double THIRD_PICKUP_X = 35;
     public static double SECOND_INTAKE_X = SECOND_PICKUP_X;
-    public static double INTAKE_Y = 56;
-    public static double INTAKE_Y2 = 62;
-    public static double END_TRAVEL_DIRECTION = -156    ;
-    public static double START_TRAVEL_DIRECTION = 180;
-    public static double LAUNCH_VELOCITY = 2020;
+    public static double INTAKE_Y = 58;
+    public static double INTAKE_Y2 = 68;
+    public static double END_TRAVEL_DIRECTION = -52.7;
+    public static double START_TRAVEL_DIRECTION = -52.7;
+    public static double LAUNCH_VELOCITY = 1120;
     public static double LAUNCH_ACCURACY = 1;
     public static double INTAKE_VELOCITY = -1000;
     public static double TURN_BACK_ON_SERVO = 1.3;
     public static double TURN_BACK_ON_SERVO2 = 1.6;
     public static double TURN_BACK_ON_SERVO_3 = 2;
-    public static double TWO_CYCLE_BACKUP_Y = 56;
+    public static double TWO_CYCLE_BACKUP_Y = 50;
     public static double START_SERVO = 1.5;
 
     public static double THIRDPICKUPEND = 60;
-    public static double END_AUTO_Y = 8;
-    public static double END_AUTO_X = -39;
+    public static double END_AUTO_Y = 13;
+    public static double END_AUTO_X = -42;
     public static double END_AUTO_ANGLE = 115;
 
-    public static double START_AUTO_X = 55;
-    public static double START_AUTO_Y = 16.5;
-    public static double START_AUTO_ANGLE = -90;
-
-    public static double SHOOT_SLEEP1 = 5;
-    public static double SHOOT_SLEEP2 = 3;
-    public static double SHOOT_SLEEP3 = 5;
-    public static double SHOOT_SLEEP4 = 5;
+    public static double SHOOT_SLEEP1 = 2.5;
+    public static double SHOOT_SLEEP2 = 2;
+    public static double SHOOT_SLEEP3 = 2;
+    public static double SHOOT_SLEEP4 = 2;
     public static int cycleMotorSpeed = 6000;
-
-
-    public static double ALIGN_KP = 0.02;
-    public static double ALIGN_TOLERANCE = 1.0;   // degrees
-    public static double ALIGN_MAX_POWER = 0.35;
-
     private void runBlocking(Action a) {
         Actions.runBlocking(new ParallelAction(
                 a,
@@ -112,82 +85,11 @@ public class BlueFarAuto extends LinearOpMode {
         ));
 
     }
-    private class AlignToTagAction implements Action {
-
-        private final MecanumDrive drive;
-        private final ElapsedTime timer = new ElapsedTime();
-
-        public AlignToTagAction(MecanumDrive drive) {
-            this.drive = drive;
-            timer.reset();
-        }
-
-        @Override
-        public boolean run(@NonNull TelemetryPacket packet) {
-
-            // 1. Timeout safety (0.8 sec recommended)
-            if (timer.seconds() > 0.8) {
-                drive.setDrivePowers(
-                        new PoseVelocity2d(
-                                new Vector2d(0, 0),
-                                0
-                        )
-                );
-                return false;
-            }
-
-            List<AprilTagDetection> detections = aprilTag.getDetections();
-
-            for (AprilTagDetection detection : detections) {
-
-                if (detection.id == 20 || detection.id == 24) {
-
-                    double error = detection.ftcPose.bearing;
-                    packet.put("Align Error", error);
-
-                    if (Math.abs(error) < ALIGN_TOLERANCE) {
-                        drive.setDrivePowers(
-                                new PoseVelocity2d(
-                                        new Vector2d(0, 0),
-                                        0
-                                )
-                        );
-                        return false;
-                    }
-
-                    double turn = error * ALIGN_KP;
-
-                    turn = Math.max(-ALIGN_MAX_POWER,
-                            Math.min(ALIGN_MAX_POWER, turn));
-
-                    drive.setDrivePowers(
-                            new PoseVelocity2d(
-                                    new Vector2d(0, 0),
-                                    turn
-                            )
-                    );
-
-                    return true;
-                }
-            }
-
-            // No tag yet — keep waiting until timeout
-            drive.setDrivePowers(
-                    new PoseVelocity2d(
-                            new Vector2d(0, 0),
-                            0
-                    )
-            );
-            return true;
-        }
-    }
-
-
     public double blueAuto(){
         return -1;
     }
     public double shotAngle() {
-        return SHOT1_ANGLE*blueAuto();
+        return SHOT1_ANGLE;
     }
     public void runOpMode() throws InterruptedException {
         telemetry.addData("Status", "Initializing...");
@@ -208,19 +110,12 @@ public class BlueFarAuto extends LinearOpMode {
         four = hardwareMap.get(CRServo.class, "four");
         five = hardwareMap.get(CRServo.class, "five");
         six = hardwareMap.get(CRServo.class, "six");
-        zero = hardwareMap.get(CRServo.class, "zero");
 
         launchLeft.setDirection(DcMotorEx.Direction.REVERSE);
         launchRight.setDirection(DcMotorEx.Direction.FORWARD);
-        aprilTag = new AprilTagProcessor.Builder().build();
-
-        visionPortal = new VisionPortal.Builder()
-                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-                .addProcessor(aprilTag)
-                .build();
 
         // --- INITIAL POSITIONS ---
-        Pose2d beginPose = new Pose2d(START_AUTO_X,START_AUTO_Y*blueAuto(), Math.toRadians(START_AUTO_ANGLE));
+        Pose2d beginPose = new Pose2d(-49.5,52*blueAuto(), Math.toRadians(127.3*blueAuto()));
 
         // Bin position/drop off position
         Pose2d shotPose = new Pose2d(SHOT1_X, SHOT1_Y*blueAuto(), Math.toRadians(shotAngle()));
@@ -253,17 +148,7 @@ public class BlueFarAuto extends LinearOpMode {
                                 ))
                                 .splineToLinearHeading(shotPose, Math.toRadians(END_TRAVEL_DIRECTION*blueAuto()))
 
-                                /*.stopAndAdd(new ParallelAction(
-                                        new CRServoAction(one, SERVO_SPEED),
-                                        new CRServoAction(two, SERVO_SPEED),
-                                        new CRServoAction(three, SERVO_SPEED),
-                                        new CRServoAction(four, -1*SERVO_SPEED),
-                                        new CRServoAction(five, SERVO_SPEED),
-                                        new CRServoAction(six, -1*SERVO_SPEED)
-                                ))
-                                */
 
-                                .stopAndAdd(new AlignToTagAction(drive))
                                 .waitSeconds(SHOOT_SLEEP1)
                                 // intake mode
                                 .afterTime(0,new ParallelAction(
@@ -284,9 +169,7 @@ public class BlueFarAuto extends LinearOpMode {
                                         new CRServoAction(six, -1*SERVO_SPEED)
                                 ))
                                 .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(shotAngle()))
-                                .stopAndAdd(new AlignToTagAction(drive))
                                 .waitSeconds(SHOOT_SLEEP2)
-
                                 //second intake mode
                                 .afterTime(0,new ParallelAction(
 
@@ -294,23 +177,52 @@ public class BlueFarAuto extends LinearOpMode {
                                         new CRServoAction(five, 1),
                                         new CRServoAction(six, 1)
                                 ))
-                                .strafeToLinearHeading(new Vector2d(human_player_pickup_backup_x,human_player_pickup_backup_y*blueAuto()), Math.toRadians(0))
-                                .strafeToLinearHeading(new Vector2d(human_player_pickup_x,human_player_pickup_backup_y*blueAuto()), Math.toRadians(0))
 
+                                // Second pickup cycle
+                                .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(SECOND_PICKUP_X, PICKUP_Y*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
+                                .strafeTo(new Vector2d(SECOND_INTAKE_X, INTAKE_Y2*blueAuto()))
+                                .strafeTo(new Vector2d(SECOND_INTAKE_X,TWO_CYCLE_BACKUP_Y*blueAuto()))
+                                .afterTime(0,new ParallelAction(
 
-
-
-                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(SHOT1_ANGLE*blueAuto()))
-                                .afterTime(TURN_BACK_ON_SERVO,new ParallelAction(
+                                        new CRServoAction(four, 0),
+                                        new CRServoAction(five, 0),
+                                        new CRServoAction(six, 0)
+                                ))
+                                .afterTime(TURN_BACK_ON_SERVO2,new ParallelAction(
 
                                         new CRServoAction(four, -1*SERVO_SPEED),
                                         new CRServoAction(five, SERVO_SPEED),
                                         new CRServoAction(six, -1*SERVO_SPEED)
                                 ))
-                                .stopAndAdd(new AlignToTagAction(drive))
+                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(shotAngle()))
+                                .waitSeconds(SHOOT_SLEEP3)
+                                //third intake mode
+                                .afterTime(0,new ParallelAction(
+
+                                        new CRServoAction(four, -0.5),
+                                        new CRServoAction(five, 1),
+                                        new CRServoAction(six, 1)
+                                ))
+                                .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, THIRD_PICKUP_Y*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(THIRD_PICKUP_X, THIRDPICKUPEND*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
+                                .afterTime(0,new ParallelAction(
+
+                                        new CRServoAction(four, 0),
+                                        new CRServoAction(five, 0),
+                                        new CRServoAction(six, 0)
+                                ))
+                                .afterTime(TURN_BACK_ON_SERVO_3,new ParallelAction(
+
+                                        new CRServoAction(four, -1*SERVO_SPEED),
+                                        new CRServoAction(five, SERVO_SPEED),
+                                        new CRServoAction(six, -1*SERVO_SPEED)
+                                ))
+                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(shotAngle()))
+                                .waitSeconds(SHOOT_SLEEP4)
+                                .strafeToLinearHeading(new Vector2d(END_AUTO_X, END_AUTO_Y*blueAuto()), Math.toRadians(END_AUTO_ANGLE*blueAuto()))
                                 .waitSeconds(5)
-
-
 
                                 .build()
                 )
