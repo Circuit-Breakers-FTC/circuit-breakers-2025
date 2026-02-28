@@ -62,11 +62,11 @@ public class RedShootMoveClose extends LinearOpMode {
     public static double START_SERVO = 1.5;
 
     public static double THIRDPICKUPEND = 60;
-    public static double END_AUTO_Y = -24;
+    public static double END_AUTO_Y = 24;
     public static double END_AUTO_X = -60;
     public static double END_AUTO_ANGLE = 270;
 
-    public static double SHOOT_SLEEP1 = 2;
+    public static double SHOOT_SLEEP1 = 3;
     public static double SHOOT_SLEEP2 = 2;
     public static double SHOOT_SLEEP3 = 2;
     public static double SHOOT_SLEEP4 = 2;
