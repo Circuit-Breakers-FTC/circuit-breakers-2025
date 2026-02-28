@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.actions.MotorPowerAction;
 
 @Autonomous
 @Config
-public class RedFlyAuto extends LinearOpMode {
+public class RedTwelveAuto extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotorEx intake = null;
     private DcMotorEx launchRight = null;
@@ -34,14 +34,13 @@ public class RedFlyAuto extends LinearOpMode {
     private CRServo four = null;
     private CRServo five = null;
     private CRServo six = null;
-    private CRServo zero = null;
 
     public static double SERVO_SPEED = 0.425;
-    public static double SHOT1_X = -15.5;
-    public static double SHOT1_Y = 14.5;
+    public static double SHOT1_X = -17.5;
+    public static double SHOT1_Y = 13.5;
     public static double SHOT1_ANGLE = 135;
-    public static double FIRST_PICKUP_X = -12.0;
-    public static double PICKUP_Y = 27.5;
+    public static double FIRST_PICKUP_X = -10.0;
+    public static double PICKUP_Y = 26;
     public static double THIRD_PICKUP_Y = 25;
     public static double PICKUP_ANGLE = 90;
     public static double FIRST_INTAKE_X = FIRST_PICKUP_X;
@@ -52,18 +51,18 @@ public class RedFlyAuto extends LinearOpMode {
     public static double INTAKE_Y2 = 62;
     public static double END_TRAVEL_DIRECTION = -52.7;
     public static double START_TRAVEL_DIRECTION = -52.7;
-    public static double LAUNCH_VELOCITY = 1300;
+    public static double LAUNCH_VELOCITY = 1120;
     public static double LAUNCH_ACCURACY = 1;
     public static double INTAKE_VELOCITY = -1000;
     public static double TURN_BACK_ON_SERVO = 1.3;
     public static double TURN_BACK_ON_SERVO2 = 1.6;
     public static double TURN_BACK_ON_SERVO_3 = 2;
-    public static double TWO_CYCLE_BACKUP_Y = 56;
+    public static double TWO_CYCLE_BACKUP_Y = 50;
     public static double START_SERVO = 1.5;
 
     public static double THIRDPICKUPEND = 60;
-    public static double END_AUTO_Y = 8;
-    public static double END_AUTO_X = -39;
+    public static double END_AUTO_Y = 13;
+    public static double END_AUTO_X = -42;
     public static double END_AUTO_ANGLE = 115;
 
     public static double SHOOT_SLEEP1 = 2;
@@ -111,7 +110,6 @@ public class RedFlyAuto extends LinearOpMode {
         four = hardwareMap.get(CRServo.class, "four");
         five = hardwareMap.get(CRServo.class, "five");
         six = hardwareMap.get(CRServo.class, "six");
-        zero = hardwareMap.get(CRServo.class, "zero");
 
         launchLeft.setDirection(DcMotorEx.Direction.REVERSE);
         launchRight.setDirection(DcMotorEx.Direction.FORWARD);
@@ -119,11 +117,11 @@ public class RedFlyAuto extends LinearOpMode {
         // --- INITIAL POSITIONS ---
         Pose2d beginPose = new Pose2d(-49.5,52*blueAuto(), Math.toRadians(127.3*blueAuto()));
 
-        GoBildaPinpointDriver driver = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
-        driver.resetPosAndIMU();
         // Bin position/drop off position
         Pose2d shotPose = new Pose2d(SHOT1_X, SHOT1_Y*blueAuto(), Math.toRadians(shotAngle()));
         MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
+        GoBildaPinpointDriver driver = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        driver.resetPosAndIMU();
 
         telemetry.addData("Status", "Initialized and Ready");
         telemetry.update();        // Where we start

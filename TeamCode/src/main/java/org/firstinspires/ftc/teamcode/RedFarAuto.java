@@ -52,9 +52,9 @@ public class RedFarAuto extends LinearOpMode {
     public static double SECOND_INTAKE_X = SECOND_PICKUP_X;
     public static double INTAKE_Y = 56;
     public static double INTAKE_Y2 = 62;
-    public static double END_TRAVEL_DIRECTION = -156    ;
+    public static double END_TRAVEL_DIRECTION = -156;
     public static double START_TRAVEL_DIRECTION = 180;
-    public static double LAUNCH_VELOCITY = 2100;
+    public static double LAUNCH_VELOCITY = 1625;
     public static double LAUNCH_ACCURACY = 1;
     public static double INTAKE_VELOCITY = -1000;
     public static double TURN_BACK_ON_SERVO = 1.3;
@@ -68,11 +68,16 @@ public class RedFarAuto extends LinearOpMode {
     public static double END_AUTO_X = -39;
     public static double END_AUTO_ANGLE = 115;
 
+    public static double START_AUTO_X = 62.5;
+    public static double START_AUTO_Y = 16.5;
+    public static double START_AUTO_ANGLE = 90;
+
     public static double SHOOT_SLEEP1 = 5;
     public static double SHOOT_SLEEP2 = 5;
     public static double SHOOT_SLEEP3 = 5;
     public static double SHOOT_SLEEP4 = 5;
     public static int cycleMotorSpeed = 6000;
+
     private void runBlocking(Action a) {
         Actions.runBlocking(new ParallelAction(
                 a,
@@ -88,12 +93,15 @@ public class RedFarAuto extends LinearOpMode {
         ));
 
     }
-    public double blueAuto(){
+
+    public double blueAuto() {
         return 1;
     }
+
     public double shotAngle() {
-        return SHOT1_ANGLE*blueAuto();
+        return SHOT1_ANGLE * blueAuto();
     }
+
     public void runOpMode() throws InterruptedException {
         telemetry.addData("Status", "Initializing...");
         telemetry.update();
@@ -119,13 +127,13 @@ public class RedFarAuto extends LinearOpMode {
         launchRight.setDirection(DcMotorEx.Direction.FORWARD);
 
         // --- INITIAL POSITIONS ---
-        Pose2d beginPose = new Pose2d(62.5,16.5*blueAuto(), Math.toRadians(90));
-        GoBildaPinpointDriver driver = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
-        driver.resetPosAndIMU();
+        Pose2d beginPose = new Pose2d(START_AUTO_X, START_AUTO_Y * blueAuto(), Math.toRadians(START_AUTO_ANGLE));
 
         // Bin position/drop off position
-        Pose2d shotPose = new Pose2d(SHOT1_X, SHOT1_Y*blueAuto(), Math.toRadians(shotAngle()));
+        Pose2d shotPose = new Pose2d(SHOT1_X, SHOT1_Y * blueAuto(), Math.toRadians(shotAngle()));
         MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
+        GoBildaPinpointDriver driver = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        driver.resetPosAndIMU();
 
         telemetry.addData("Status", "Initialized and Ready");
         telemetry.update();        // Where we start
@@ -143,14 +151,14 @@ public class RedFarAuto extends LinearOpMode {
                         // One continuous trajectory with markers for servo activation
                         drive.actionBuilder(beginPose)
                                 // Go to shot position
-                                .setTangent(Math.toRadians(START_TRAVEL_DIRECTION*blueAuto()))
-                                .afterTime(START_SERVO,new ParallelAction(
+                                .setTangent(Math.toRadians(START_TRAVEL_DIRECTION * blueAuto()))
+                                .afterTime(START_SERVO, new ParallelAction(
 
-                                        new CRServoAction(four, -1*SERVO_SPEED),
+                                        new CRServoAction(four, -1 * SERVO_SPEED),
                                         new CRServoAction(five, SERVO_SPEED),
-                                        new CRServoAction(six, -1*SERVO_SPEED)
+                                        new CRServoAction(six, -1 * SERVO_SPEED)
                                 ))
-                                .splineToLinearHeading(shotPose, Math.toRadians(END_TRAVEL_DIRECTION*blueAuto()))
+                                .splineToLinearHeading(shotPose, Math.toRadians(END_TRAVEL_DIRECTION * blueAuto()))
 
                                 /*.stopAndAdd(new ParallelAction(
                                         new CRServoAction(one, SERVO_SPEED),
@@ -164,44 +172,42 @@ public class RedFarAuto extends LinearOpMode {
 
                                 .waitSeconds(SHOOT_SLEEP1)
                                 // intake mode
-                                .afterTime(0,new ParallelAction(
+                                .afterTime(0, new ParallelAction(
 
                                         new CRServoAction(four, -0.5),
                                         new CRServoAction(five, 1),
                                         new CRServoAction(six, 1)
                                 ))
                                 // First pickup cycle
-                                .setTangent(Math.toRadians(PICKUP_ANGLE*blueAuto()))
-                                .strafeToLinearHeading(new Vector2d(FIRST_PICKUP_X, PICKUP_Y*blueAuto()), Math.toRadians(PICKUP_ANGLE*blueAuto()))
-                                .strafeTo(new Vector2d(FIRST_INTAKE_X, INTAKE_Y*blueAuto()))
+                                .setTangent(Math.toRadians(PICKUP_ANGLE * blueAuto()))
+                                .strafeToLinearHeading(new Vector2d(FIRST_PICKUP_X, PICKUP_Y * blueAuto()), Math.toRadians(PICKUP_ANGLE * blueAuto()))
+                                .strafeTo(new Vector2d(FIRST_INTAKE_X, INTAKE_Y * blueAuto()))
 
-                                .afterTime(TURN_BACK_ON_SERVO,new ParallelAction(
+                                .afterTime(TURN_BACK_ON_SERVO, new ParallelAction(
 
-                                        new CRServoAction(four, -1*SERVO_SPEED),
+                                        new CRServoAction(four, -1 * SERVO_SPEED),
                                         new CRServoAction(five, SERVO_SPEED),
-                                        new CRServoAction(six, -1*SERVO_SPEED)
+                                        new CRServoAction(six, -1 * SERVO_SPEED)
                                 ))
-                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(shotAngle()))
+                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y * blueAuto()), Math.toRadians(shotAngle()))
                                 .waitSeconds(SHOOT_SLEEP2)
                                 //second intake mode
-                                .afterTime(0,new ParallelAction(
+                                .afterTime(0, new ParallelAction(
 
                                         new CRServoAction(four, -0.5),
                                         new CRServoAction(five, 1),
                                         new CRServoAction(six, 1)
                                 ))
-                                .strafeToLinearHeading(new Vector2d(human_player_pickup_backup_x,human_player_pickup_backup_y*blueAuto()), Math.toRadians(0))
-                                .strafeToLinearHeading(new Vector2d(human_player_pickup_x,human_player_pickup_backup_y*blueAuto()), Math.toRadians(0))
+                                .strafeToLinearHeading(new Vector2d(human_player_pickup_backup_x, human_player_pickup_backup_y * blueAuto()), Math.toRadians(0))
+                                .strafeToLinearHeading(new Vector2d(human_player_pickup_x, human_player_pickup_backup_y * blueAuto()), Math.toRadians(0))
 
 
+                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y * blueAuto()), Math.toRadians(SHOT1_ANGLE * blueAuto()))
+                                .afterTime(TURN_BACK_ON_SERVO, new ParallelAction(
 
-
-                                .strafeToLinearHeading(new Vector2d(SHOT1_X, SHOT1_Y*blueAuto()), Math.toRadians(SHOT1_ANGLE*blueAuto()))
-                                .afterTime(TURN_BACK_ON_SERVO,new ParallelAction(
-
-                                        new CRServoAction(four, -1*SERVO_SPEED),
+                                        new CRServoAction(four, -1 * SERVO_SPEED),
                                         new CRServoAction(five, SERVO_SPEED),
-                                        new CRServoAction(six, -1*SERVO_SPEED)
+                                        new CRServoAction(six, -1 * SERVO_SPEED)
                                 ))
                                 .waitSeconds(5)
 
