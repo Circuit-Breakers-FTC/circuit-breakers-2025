@@ -52,7 +52,7 @@ public class RedShootMoveClose extends LinearOpMode {
     public static double INTAKE_Y2 = 62;
     public static double END_TRAVEL_DIRECTION = -52.7;
     public static double START_TRAVEL_DIRECTION = -52.7;
-    public static double LAUNCH_VELOCITY = 1300;
+    public static double LAUNCH_VELOCITY = 1120;
     public static double LAUNCH_ACCURACY = 1;
     public static double INTAKE_VELOCITY = -1000;
     public static double TURN_BACK_ON_SERVO = 1.3;
@@ -90,7 +90,7 @@ public class RedShootMoveClose extends LinearOpMode {
         return 1;
     }
     public double shotAngle() {
-        return SHOT1_ANGLE;
+        return SHOT1_ANGLE*blueAuto();
     }
     public void runOpMode() throws InterruptedException {
         telemetry.addData("Status", "Initializing...");
@@ -150,15 +150,6 @@ public class RedShootMoveClose extends LinearOpMode {
                                 ))
                                 .splineToLinearHeading(shotPose, Math.toRadians(END_TRAVEL_DIRECTION*blueAuto()))
 
-                                /*.stopAndAdd(new ParallelAction(
-                                        new CRServoAction(one, SERVO_SPEED),
-                                        new CRServoAction(two, SERVO_SPEED),
-                                        new CRServoAction(three, SERVO_SPEED),
-                                        new CRServoAction(four, -1*SERVO_SPEED),
-                                        new CRServoAction(five, SERVO_SPEED),
-                                        new CRServoAction(six, -1*SERVO_SPEED)
-                                ))
-                                */
 
                                 .waitSeconds(SHOOT_SLEEP1)
                                 // intake mode
