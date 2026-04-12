@@ -27,10 +27,7 @@ import org.firstinspires.ftc.teamcode.actions.MotorPowerAction;
 @Config
 public class RedSpindexerAuto extends LinearOpMode {
     // --- Hardware ---
-    private DcMotor left_front_drive = null;
-    private DcMotor right_front_drive = null;
-    private DcMotor left_back_drive = null;
-    private DcMotor right_back_drive = null;
+   
     private DcMotorEx launcher = null;
     private Servo gate = null;
     private DcMotorEx spindexer = null;
@@ -41,7 +38,7 @@ public class RedSpindexerAuto extends LinearOpMode {
     ElapsedTime delayTimer = new ElapsedTime();
 
     // --- Autonomous Constants / Positions ---
-    public static double SERVO_SPEED = 0.425;
+
     public int targetPos;
     public static double SHOT1_X = -15.5;
     public static double SHOT1_Y = 14.5;
@@ -58,12 +55,7 @@ public class RedSpindexerAuto extends LinearOpMode {
     public static double INTAKE_Y2 = 62;
     public static double END_TRAVEL_DIRECTION = -156;
     public static double START_TRAVEL_DIRECTION = 180;
-    public static double LAUNCH_VELOCITY = 2016;
-    public static double LAUNCH_ACCURACY = 1;
-    public static double INTAKE_VELOCITY = -1000;
-    public static double TURN_BACK_ON_SERVO = 0.75;
-    public static double TURN_BACK_ON_SERVO2 = 1.5;
-    public static double TURN_BACK_ON_SERVO_3 = 1.5;
+
     public static double TWO_CYCLE_BACKUP_Y = 47;
     public static double START_SERVO = 1.5;
     public boolean intakeOn = false;
@@ -78,43 +70,14 @@ public class RedSpindexerAuto extends LinearOpMode {
     public static double END_AUTO_X = -39;
     public static double END_AUTO_ANGLE = 115;
     public static double spin_Sleep = 1;
-    public static double SHOOT_SLEEP1 = 2.5;
-    public static double SHOOT_SLEEP2 = 3;
-    public static double SHOOT_SLEEP3 = 3;
+
 
     // --- TeleOp Variables ---
-    final double FEED_TIME_SECONDS = 0.15; // feeder servos run this long
-    final double TIME_BETWEEN_SHOTS = 1; // time between shots
-    final double STOP_SPEED = 0.0;
-    final double FULL_SPEED = 1.0;
-    final double gateTime = 1.0;
-    double driveTime = 2;
-    double speed = 1;
-    boolean yWasPressedTele = false;
-    boolean gatePressed = false;
-    boolean sucking = false;
-    boolean collectDriving = false;
-    int v1 = 0;
+
     String pos1_Color = "green"; // pos 1 starts with a ball
     String pos2_Color = "green"; // pos 2 starts with a ball
     String pos3_Color = "green"; //pos 3 starts with with a ball
-    boolean colorLocked = false;
-    boolean launchNow = false;
 
-    String shotColor1 = "empty";
-    String shotColor2 = "empty";
-    String shotColor3 = "empty";
-    String comp1 = "green";
-    String comp2 = "purple";
-    String comp3 = "purple";
-    String clrInComp = "empty";
-    String pattern = "gpp";
-    boolean index = false;
-
-    double LAUNCHER_TARGET_VELOCITY;
-    double LAUNCHER_MIN_VELOCITY;
-    double GATE_OPEN;
-    double GATE_CLOSED;
 
     ElapsedTime feederTimer = new ElapsedTime();
     ElapsedTime gateTimer = new ElapsedTime();
